@@ -19,3 +19,5 @@ dist/
 # Ignore source files whose name prefixed with "Private"
 Private*.scala
 quickstartapp/
+completeSetup.sh
+startElastic.sh
