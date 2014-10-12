@@ -375,7 +375,7 @@ object YahooDataSource {
 
 object PredefinedDSP {
   val BigSP500 = YahooDataSource.Params(
-    appId = 2,
+    appId = 3,
     entityType = "yahoo",
     untilTime = None,
     windowParams = DataSourceParams(
