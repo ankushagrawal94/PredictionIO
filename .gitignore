@@ -21,3 +21,4 @@ Private*.scala
 quickstartapp/
 completeSetup.sh
 startElastic.sh
+run.sh

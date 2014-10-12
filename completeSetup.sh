@@ -19,5 +19,5 @@ echo Ran YahooDataSource
 sleep 10
 echo Starting Dashboard
 echo If you run into errors, edit the port number in the script
-/Development/predictionIO/PredictionIO/bin/pio dashboard —port 9001
+/Development/predictionIO/PredictionIO/bin/pio dashboard --port 9001
 echo Started Dashboard. Check it out at: localhost:9001
