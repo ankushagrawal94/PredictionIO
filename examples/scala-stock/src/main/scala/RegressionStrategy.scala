@@ -15,8 +15,9 @@ import nak.regress.LinearRegression
 
 class RegressionStrategy
     extends StockStrategy[Map[String, DenseVector[Double]]] {
-  val trainingWindowSize = 200
+  val trainingWindowSize = 200 // data time range in # of days
 
+  // Difference in closing prices?
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
@@ -35,21 +36,25 @@ class RegressionStrategy
   }
   
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
-    val price = dataView.priceFrame(trainingWindowSize)
+    // trainingWindowSize - data time range
+    val price = dataView.priceFrame(trainingWindowSize) // map from ticker to array of stock prices
     val logPrice = price.mapValues(math.log)
-    val active = dataView.activeFrame(trainingWindowSize)
+    val active = dataView.activeFrame(trainingWindowSize) // what is activeFrame?
 
     val ret1d = getRet(logPrice, 1)
     val ret1w = getRet(logPrice, 5)
     val ret1m = getRet(logPrice, 22)
     val retF1d = getRet(logPrice, -1)
 
-    val timeIndex = price.rowIx
-    val firstIdx = 25
+    val timeIndex = price.rowIx // WHAT IS ROWIX ???
+    val firstIdx = 25 // why start on 25th?
     val lastIdx = timeIndex.length
 
+    // What is this?
     val tickers = price.colIx.toVec.contents
 
+    // Why are you using the first column? What is findOne?
+    // Is this a validity test for the data set - filtering out the non-active tickers?
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
@@ -61,6 +66,7 @@ class RegressionStrategy
       (ticker, model)
     }).toMap
 
+    // What is this mapping the tickers to?
     tickerModelMap
   }
 
