@@ -47,7 +47,7 @@ class RegressionStrategy
     val retF1d = getRet(logPrice, -1)
 
     val timeIndex = price.rowIx // WHAT IS ROWIX ???
-    val firstIdx = 25 // why start on 25th?
+    val firstIdx = 25 // why start on 25th? -> offset past 22
     val lastIdx = timeIndex.length
 
     // What is this?
@@ -55,6 +55,7 @@ class RegressionStrategy
 
     // Why are you using the first column? What is findOne?
     // Is this a validity test for the data set - filtering out the non-active tickers?
+    // returns a 1D array - time series
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
