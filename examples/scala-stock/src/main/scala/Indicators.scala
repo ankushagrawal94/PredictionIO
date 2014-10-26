@@ -20,7 +20,6 @@ class Indicators {
 	   Return: Same frame
 	 */
 	def CalculateRSI(logPrice: Frame[DateTime, String, Double], d: Int) {
-<<<<<<< HEAD
 		//100 - (100/1+CalculateRS(logPrice))
 		//val upday = getU(logPrice, d)
 		//val downday = getD(logPrice, d)
