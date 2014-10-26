@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="43e3904994bf2f3719156729ce155fb44b84cd0d_09a4e69cff8d225729656f7e97e40893b23bffef">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/engines/target/streams/$global/assemblyOption/$global/streams/assembly/43e3904994bf2f3719156729ce155fb44b84cd0d_09a4e69cff8d225729656f7e97e40893b23bffef/objenesis-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/engines/target/streams/$global/assemblyOption/$global/streams/assembly/43e3904994bf2f3719156729ce155fb44b84cd0d_09a4e69cff8d225729656f7e97e40893b23bffef/minlog-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/engines/target/streams/$global/assemblyOption/$global/streams/assembly/43e3904994bf2f3719156729ce155fb44b84cd0d_09a4e69cff8d225729656f7e97e40893b23bffef/reflectasm-1.07-shaded.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

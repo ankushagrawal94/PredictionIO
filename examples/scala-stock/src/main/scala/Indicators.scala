@@ -18,15 +18,23 @@ class Indicators {
 	/* RSI
 	   Input: logPrice: Frame[DateTime, String, Double], d: Int
 	   Return: Same frame
-
 	 */
 	def CalculateRSI(logPrice: Frame[DateTime, String, Double], d: Int) {
+<<<<<<< HEAD
 		//100 - (100/1+CalculateRS(logPrice))
-
+		//val upday = getU(logPrice, d)
+		//val downday = getD(logPrice, d)
+		//100 - (100/1+CalculateRS(upday, downday, d))
 	}
 
 	// RS
 	private def CalculateRS(/*input*/) {
+		// EMA(U, D, k, d)/EMA(D, U, k, d)
+	}
+
+	// EMA(U, D, k, d), EMA(D, U, k, d)
+	// iterates through frame
+	private def iterateEMA(/*input*/) {
 
 	}
 
@@ -79,5 +87,20 @@ class Indicators {
 		//save this value to the current day
 
 		//return the map
+	}
+}
+	private def CalculateEMA(todayPrice: Double, yesterdayPrice: Double, d: Int) {
+		val k = 2/(d + 1)
+		todayPrice * k + yesterdayPrice * (1-k)
+	}
+
+	// upday closing gains
+	private def getU(logPrice: Frame[DateTime, String, Double], d: Int) {
+
+	}
+
+	// downday closing losses
+	private def getD(logPrice: Frame[DateTime, String, Double], d: Int) {
+
 	}
 }

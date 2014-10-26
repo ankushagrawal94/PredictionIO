@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="gwt" name="GWT">
+      <configuration />
+    </facet>
+    <facet type="Osmorc" name="OSGi">
+      <configuration manifestGenerationMode="Manually" manifestLocation="scala-stock/target/streams/$global/assemblyOption/$global/streams/assembly/162023622a4f5f26ea2cf9fccc4c080687ec62b6_5af35056b4d257e4b64b9e8069c0746e8b08629f/META-INF/MANIFEST.MF" jarfileLocation="examples.jar" outputPathType="CompilerOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="" bundleSymbolicName="" bundleVersion="1.0.0" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="false" doNotSynchronizeWithMaven="false">
+        <additionalProperties />
+        <additionalJARContents />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/java-local-helloworld" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scala-elasticsearch" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scala-local-helloworld" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scala-local-regression" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scala-parallel-regression" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scala-test" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="scala-2.103" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="pio-assembly-0.8.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="scala-2.10" level="project" />
+    <orderEntry type="module" module-name="target" />
+    <orderEntry type="module" module-name="main" />
+  </component>
+</module>
+

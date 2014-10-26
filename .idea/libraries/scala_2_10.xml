@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="scala-2.10">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/examples/scala-stock/target/scala-2.10/example-scala-stock-assembly-0.1-SNAPSHOT-deps.jar!/" />
+      <root url="jar://$PROJECT_DIR$/examples/scala-stock/target/scala-2.10/example-scala-stock_2.10-0.1-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
