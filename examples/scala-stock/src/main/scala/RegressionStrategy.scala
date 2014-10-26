@@ -34,7 +34,7 @@ class RegressionStrategy
     val result = LinearRegression.regress(m, target)
     result
   }
-  
+
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // trainingWindowSize - data time range
     val price = dataView.priceFrame(trainingWindowSize) // map from ticker to array of stock prices
@@ -42,6 +42,10 @@ class RegressionStrategy
     val active = dataView.activeFrame(trainingWindowSize) // what is activeFrame?
 
     val ret1d = getRet(logPrice, 1)
+    println("calling firstAvgGain")
+    val indic = new Indicators()
+    val test = indic.firstAvgGain(ret1d, 1)
+    println("finished calling firstAvgGain")
     val ret1w = getRet(logPrice, 5)
     val ret1m = getRet(logPrice, 22)
     val retF1d = getRet(logPrice, -1)
@@ -92,7 +96,7 @@ class RegressionStrategy
   def onClose(model: Map[String, DenseVector[Double]], query: Query)
   : Prediction = {
     val dataView = query.dataView
-    
+
     val price = dataView.priceFrame(windowSize = 30)
     //val logPrice = price.mapValues(math.log)
 

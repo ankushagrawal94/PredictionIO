@@ -56,14 +56,15 @@ class Indicators {
 		//For period = 1day use ret1d = getRet(logPrice, 1)
 
 		val numPeriods = 14
-		var firstGains = new Array[Double](14)
+		var firstGains = new Array[Double](100)
 		var tickerCount = 0
+		var ticker = 0
 		for (ticker <- 0 to 100/*priceDelta(0,*).length*/) { //need someway of accessing every ticker in the map
 			var numGains: Double = 0.0
 			var average: Double = 0.0
 			var day: Double = 0.0
 			for (day <- 0 to (numPeriods-1) * period) {
-				//println("day is: " + day.toString)
+				println("day is: " + day)
 				var change = priceDelta.raw(ticker,day)
 				if (change > 0) {
 					numGains = numGains + 1
@@ -71,9 +72,11 @@ class Indicators {
 				}
 			}
 			average = average / numGains
+			println("average is: " + average)
 			tickerCount = tickerCount + 1
 			firstGains(tickerCount) = average
 		}
+		println(firstGains)
 		return firstGains
 	}
 
@@ -87,19 +90,5 @@ class Indicators {
 
 		//return the map
 	}
-}
-	private def CalculateEMA(todayPrice: Double, yesterdayPrice: Double, d: Int) {
-		val k = 2/(d + 1)
-		todayPrice * k + yesterdayPrice * (1-k)
-	}
 
-	// upday closing gains
-	private def getU(logPrice: Frame[DateTime, String, Double], d: Int) {
-
-	}
-
-	// downday closing losses
-	private def getD(logPrice: Frame[DateTime, String, Double], d: Int) {
-
-	}
 }
