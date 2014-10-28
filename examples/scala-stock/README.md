@@ -1,12 +1,18 @@
-# Using predictionIO to run prediction using Yahoo Finance
+# Using predictionIO to run predictions using Yahoo Finance
 
 ## Setting up the environment
 
 ### Step 1: Get your Pandas
 Where: PredictionIO-Python-SDK
+
 Run: sudo pip install pandas==0.13.1
-pip command not found? install python from curl -O https://bootstrap.pypa.io/get-pip.py
+
+pip command not found? install python from curl -O
+
+https://bootstrap.pypa.io/get-pip.py
+
 python get-pip.py
+
 and then run sudo pip install pandas
 
 ### Step 2: Edit import_yahoo.py
