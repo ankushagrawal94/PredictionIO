@@ -1,6 +1,40 @@
+# Using predictionIO to run prediction using Yahoo Finance
+
+## Setting up the environment
+
+### Step 1: Get your Pandas
+Where: PredictionIO-Python-SDK
+Run: sudo pip install pandas==0.13.1
+pip command not found? install python from curl -O https://bootstrap.pypa.io/get-pip.py
+python get-pip.py
+and then run sudo pip install pandas
+
+### Step 2: Edit import_yahoo.py
+2. Edit import_yahoo.py
+Where: PredictionIO-Python-SDK/examples/import_yahoo.py
+At the end of file, find the following:
+if __name__ == '__main__':
+  #import_all(app_id=?)
+  import_data_with_gaps(app_id=1)
+  #import_one(app_id=1)
+And, uncomment the first import, replacing app_id with your own id. Next, comment the second import statement (import_data_with_gaps).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # (This doc is out-of-sync with the actual implementation)
 
-## How to implement a stock prediction algorithm 
+## How to implement a stock prediction algorithm
 
 ### Fetch data from external source
 You only need to do it once. (Unless you want to update your data.)
