@@ -59,7 +59,7 @@ class Indicators {
 		var firstGains = new Array[Double](100)
 		var tickerCount = 0
 		var ticker = 0
-		for (ticker <- 0 to 100/*priceDelta(0,*).length*/) { //need someway of accessing every ticker in the map
+		for (ticker <- 0 to 10/*priceDelta(0,*).length*/) { //need someway of accessing every ticker in the map
 			var numGains: Double = 0.0
 			var average: Double = 0.0
 			var day: Double = 0.0
@@ -74,11 +74,38 @@ class Indicators {
 			average = average / numGains
 			println("average is: " + average)
 			tickerCount = tickerCount + 1
-			firstGains(tickerCount) = average
+			//firstGains(tickerCount) = average
 		}
 		println(firstGains)
 		return firstGains
 	}
+
+	/*
+	* @authors - Matt & Leta
+	*Tested the following functions using simple calles in
+	*the interpreter. need to find way to test on the whole.
+	*/
+
+
+	def calcRS(priceDelta: Frame[DateTime, String, Double], period: Int){
+		//(logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
+
+		//Positive Vecs
+		posFrame = priceDelta.mapValues[Double]( (x:Double) => if (x > 0) x else 0)
+
+		//Negative Vecs
+		negFrame = priceDelta.mapValues[Double]( (x:Double) => if (x < 0) x else 0)
+
+		//Get the sum of positive Framse
+		sumPosFrame = posFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
+
+		//Get sum of negative
+		sumNegFrame = negFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
+
+		rsFrame = sumPosFrame/sumNegFrame
+
+	}
+
 
 	def avgGain(priceDelta: Frame[DateTime, String, Double], d: Int) {
 
@@ -90,5 +117,7 @@ class Indicators {
 
 		//return the map
 	}
+
+
 
 }
