@@ -20,7 +20,7 @@ class Indicators {
 	   Return: Same frame
 	 */
 	def calcRSI(logPrice: Frame[DateTime, String, Double], d: Int) {
-		100 - (100/(1+calcRS(logPrice)))
+		100 - (100/(1+calcRS(logPrice, d)))
 	}
 
 	/*
