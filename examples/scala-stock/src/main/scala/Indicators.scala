@@ -34,22 +34,22 @@ class Indicators {
 		//(logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
 		//Positive Vecs
-		posFrame = priceDelta.mapValues[Double]( (x:Double) => if (x > 0) x else 0)
+		val posFrame = priceDelta.mapValues[Double]( (x:Double) => if (x > 0) x else 0)
 		println("calcRS: Found positive vecs")
 
 		//Negative Vecs
-		negFrame = priceDelta.mapValues[Double]( (x:Double) => if (x < 0) x else 0)
+		val negFrame = priceDelta.mapValues[Double]( (x:Double) => if (x < 0) x else 0)
 		println("calcRS: Found negative vecs")
 
 		//Get the sum of positive Framse
-		sumPosFrame = posFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
+		val sumPosFrame = posFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
 		println("calcRS: Found sum of positive frames")
 
 		//Get sum of negative
-		sumNegFrame = negFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
+		val sumNegFrame = negFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
 		println("calcRS: Found sum of negative frames")
 
-		rsFrame = sumPosFrame/sumNegFrame
+		val rsFrame = sumPosFrame/sumNegFrame
 		println("calcRS: Found rsFrame")
 
 		println("calcRS: Returning from calcRS")
