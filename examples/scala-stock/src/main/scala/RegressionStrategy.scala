@@ -52,7 +52,7 @@ class RegressionStrategy
     val ret1m = getRet(logPrice, 22)
     val retF1d = getRet(logPrice, -1)
 
-    val timeIndex = price.rowIx
+    val timeIndex = price.rowIx // WHAT IS ROWIX ???
     val firstIdx = 25 // why start on 25th? -> offset past 22
     val lastIdx = timeIndex.length
 

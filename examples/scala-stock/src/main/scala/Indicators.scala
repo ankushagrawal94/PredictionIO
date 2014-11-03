@@ -19,8 +19,9 @@ class Indicators {
 	   Input: logPrice: Frame[DateTime, String, Double], d: Int
 	   Return: Same frame
 	 */
-	def calcRSI(logPrice: Frame[DateTime, String, Double], d: Int) {
-		100 - (100/(1+calcRS(logPrice, d)))
+	def calcRSI(logPrice: Frame[DateTime, String, Double], d: Int) = {
+		val rsFrame = calcRS(logPrice, d)
+		val rsiFrame = rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
 	}
 
 	/*
@@ -30,7 +31,7 @@ class Indicators {
 	*/
 
 
-	private def calcRS(priceDelta: Frame[DateTime, String, Double], period: Int){
+	private def calcRS(priceDelta: Frame[DateTime, String, Double], period: Int) = {
 		//(logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
 		//Positive Vecs
@@ -53,6 +54,8 @@ class Indicators {
 		println("calcRS: Found rsFrame")
 
 		println("calcRS: Returning from calcRS")
+
+		rsFrame
 	}
 
 	// RS
