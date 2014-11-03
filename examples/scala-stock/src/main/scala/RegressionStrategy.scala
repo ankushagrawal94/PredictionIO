@@ -41,16 +41,18 @@ class RegressionStrategy
     val logPrice = price.mapValues(math.log)
     val active = dataView.activeFrame(trainingWindowSize) // what is activeFrame?
 
-    val ret1d = getRet(logPrice, 1)
-    println("calling firstAvgGain")
+    /* Calling Indicator class */
+    println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
-    val test = indic.firstAvgGain(ret1d, 1)
-    println("finished calling firstAvgGain")
+    val test = indic.calcRSI(logPrice, 1)
+    println("RegressionStrategy: finished calling calcRSI")
+
+    val ret1d = getRet(logPrice, 1)
     val ret1w = getRet(logPrice, 5)
     val ret1m = getRet(logPrice, 22)
     val retF1d = getRet(logPrice, -1)
 
-    val timeIndex = price.rowIx // WHAT IS ROWIX ???
+    val timeIndex = price.rowIx
     val firstIdx = 25 // why start on 25th? -> offset past 22
     val lastIdx = timeIndex.length
 
@@ -67,7 +69,8 @@ class RegressionStrategy
         ret1d.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1w.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1m.firstCol(ticker).slice(firstIdx, lastIdx),
-        retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
+        retF1d.firstCol(ticker).slice(firstIdx, lastIdx),
+        test.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
 
