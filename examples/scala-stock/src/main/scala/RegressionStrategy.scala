@@ -44,8 +44,12 @@ class RegressionStrategy
     /* Calling Indicator class */
     println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
-    val test = indic.calcRSI(logPrice, 1)
+    val test1 = indic.calcRSI(logPrice, 1)
     println("RegressionStrategy: finished calling calcRSI")
+
+    // Fill in first 14 days offset with zero
+    val test = test1.reindexRow(price.rowIx)
+    test.mapVec[Double](_.fillNA(_  => 0.0))
 
     val ret1d = getRet(logPrice, 1)
     val ret1w = getRet(logPrice, 5)
