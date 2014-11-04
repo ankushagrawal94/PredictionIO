@@ -11,6 +11,8 @@ import com.github.nscala_time.time.Imports._
 
 import scala.math
 
+import math._
+
 import nak.regress.LinearRegression
 
 class Indicators {
@@ -21,7 +23,7 @@ class Indicators {
 	 */
 	def calcRSI(logPrice: Frame[DateTime, String, Double], d: Int) = {
 		val rsFrame = calcRS(logPrice, d)
-		val rsiFrame = rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
+		rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
 	}
 
 	/*
@@ -43,11 +45,11 @@ class Indicators {
 		println("calcRS: Found negative vecs")
 
 		//Get the sum of positive Framse
-		val sumPosFrame = posFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
+		val sumPosFrame = posFrame.rolling[Double] (14, (f: Series[DateTime,Double]) => f.mean  )
 		println("calcRS: Found sum of positive frames")
 
 		//Get sum of negative
-		val sumNegFrame = negFrame.rolling[Double]( (14,( (s: Series[Double,Double]) => s.mean) ) )
+		val sumNegFrame = negFrame.rolling[Double] (14, (f: Series[DateTime,Double]) => f.mean  )
 		println("calcRS: Found sum of negative frames")
 
 		val rsFrame = sumPosFrame/sumNegFrame
@@ -111,7 +113,7 @@ class Indicators {
 		// firstGains
 	// }
 
-	
+
 
 
 	// def avgGain(priceDelta: Frame[DateTime, String, Double], d: Int) {

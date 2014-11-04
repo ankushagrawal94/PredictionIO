@@ -44,7 +44,7 @@ class RegressionStrategy
     /* Calling Indicator class */
     println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
-    val test = indic.calcRSI(logPrice, 1)
+    val test = indic.calcRS(logPrice, 1)
     println("RegressionStrategy: finished calling calcRSI")
 
     val ret1d = getRet(logPrice, 1)
@@ -69,6 +69,7 @@ class RegressionStrategy
         ret1d.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1w.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1m.firstCol(ticker).slice(firstIdx, lastIdx),
+        //retF1d.firstCol(ticker).slice(firstIdx, lastIdx)
         test.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
