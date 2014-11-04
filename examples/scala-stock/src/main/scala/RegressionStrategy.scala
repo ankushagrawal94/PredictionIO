@@ -44,7 +44,7 @@ class RegressionStrategy
     /* Calling Indicator class */
     println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
-    val test = indic.calcRS(logPrice, 1)
+    val test = indic.calcRSI(logPrice, 1)
     println("RegressionStrategy: finished calling calcRSI")
 
     val ret1d = getRet(logPrice, 1)
