@@ -24,11 +24,11 @@ and then run sudo pip install pandas
 2. Edit import_yahoo.py
 Where: PredictionIO-Python-SDK/examples/import_yahoo.py
 At the end of file, find the following:
-if __name__ == '__main__':
-  #import_all(app_id=?)
-  import_data_with_gaps(app_id=1)
-  #import_one(app_id=1)
-And, uncomment the first import, replacing app_id with your own id. Next, comment the second import statement (import_data_with_gaps).
+if name == 'main':
+  #import all(app_id=?)
+  import data with gaps(app_id=1)
+  #import one(app_id=1)
+And, uncomment the first import, replacing app id with your own id. Next, comment the second import statement (import data with gaps).
 
 3. Now, import Yahoo Finance data.
 Where: PredictionIO-Python-SDK/examples
