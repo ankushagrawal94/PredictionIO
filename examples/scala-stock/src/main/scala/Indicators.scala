@@ -31,15 +31,15 @@ class Indicators {
 	*/
 
 
-	private def calcRS(priceDelta: Frame[DateTime, String, Double], period: Int) = {
+	private def calcRS(logPrice: Frame[DateTime, String, Double], period: Int) = {
 		//(logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
 		//Positive Vecs
-		val posFrame = priceDelta.mapValues[Double]( (x:Double) => if (x > 0) x else 0)
+		val posFrame = logPrice.mapValues[Double]( (x:Double) => if (x > 0) x else 0)
 		println("calcRS: Found positive vecs")
 
 		//Negative Vecs
-		val negFrame = priceDelta.mapValues[Double]( (x:Double) => if (x < 0) x else 0)
+		val negFrame = logPrice.mapValues[Double]( (x:Double) => if (x < 0) x else 0)
 		println("calcRS: Found negative vecs")
 
 		//Get the sum of positive Framse
@@ -128,7 +128,5 @@ class Indicators {
 
 		//return the map
 	// }
-
-
-
+	
 }

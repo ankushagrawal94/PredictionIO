@@ -69,7 +69,6 @@ class RegressionStrategy
         ret1d.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1w.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1m.firstCol(ticker).slice(firstIdx, lastIdx),
-        retF1d.firstCol(ticker).slice(firstIdx, lastIdx),
         test.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
