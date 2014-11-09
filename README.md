@@ -16,7 +16,7 @@ Start-up Instructions:
 
 1. First get your Pandas
 Where: PredictionIO-Python-SDK
-Run: sudo pip install pandas==0.13.1 
+Run: sudo pip install pandas==0.13.1
 pip command not found? install python from curl -O https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 and then run sudo pip install pandas
@@ -36,7 +36,7 @@ Run: sudo python -m examples.import_yahoo
 
 4. Start a spark master and slave (worker)
 Where: within the spark directory (in our version: spark-1.1.0-bin-hadoop2.4)
-Run:    1. sbin/start-master.sh 
+Run:    1. sbin/start-master.sh
 		2. sbin/start-slave.sh
 				OR
    		sbin/start-all.sh
@@ -59,7 +59,7 @@ Where: cloned PredictionIO directory (with source code, make sure code is update
 Run: ./make-distribution.sh
 
 9. Ensure all dependencies are working
-Type jps into console should see 
+Type jps into console should see
 
 10. Check localhost8080
 Navigate to http:localhost8080
@@ -73,9 +73,9 @@ Edit app_id to match the one from step 2
 
 12. Run scala-stock
 Go to PredictionIO/examples/scala-stock
-Now type: ../../bin/pio run --asm io.prediction.examples.stock.YahooDataSourceRun -- --master <Your spark master address found at http:local8080> --driver-memory <4-12G>
+Now type: ../../bin/pio run --asm io.prediction.examples.stock.YahooDataSourceRun -- --master <Your spark master address found at http://localhost:8080> --driver-memory <4-12G>
 
 13. Open dashboard to view the results
 In PredictionIO folder
 Type /bin/pio dashboard
-go to url: http:localhost900 to view output
+go to url: http://localhost:9000 to view output
