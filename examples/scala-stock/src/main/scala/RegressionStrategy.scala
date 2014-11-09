@@ -35,6 +35,19 @@ class RegressionStrategy
     result
   }
 
+
+  private def regress2(
+    features: Seq[Series[DateTime, Double]],
+    retF1d: Series[DateTime, Double]) = {
+    val array = (
+      features.map(_.toVec.contents).reduce(_ ++ _) ++
+      Array.fill(retF1d.length)(1.0))
+    val target = DenseVector[Double](retF1d.toVec.contents)
+    val m = DenseMatrix.create[Double](retF1d.length, features.length + 1, array)
+    val result = LinearRegression.regress(m, target)
+    result
+  }
+
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // trainingWindowSize - data time range
     val price = dataView.priceFrame(trainingWindowSize) // map from ticker to array of stock prices
@@ -69,10 +82,10 @@ class RegressionStrategy
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
-      val model = regress(
+      val model = regress2( Seq(
         ret1d.firstCol(ticker).slice(firstIdx, lastIdx),
         ret1w.firstCol(ticker).slice(firstIdx, lastIdx),
-        ret1m.firstCol(ticker).slice(firstIdx, lastIdx),
+        ret1m.firstCol(ticker).slice(firstIdx, lastIdx) ),
         //retF1d.firstCol(ticker).slice(firstIdx, lastIdx)
         test.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
