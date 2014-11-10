@@ -1,7 +1,7 @@
 # Using predictionIO to run predictions using Yahoo Finance
 
-This tutorial assumes you gone through the quickstart guide for
-PredictionIO
+This tutorial assumes you have gone through the quickstart guide for
+PredictionIO.
 
 ## Setting up the environment
 
