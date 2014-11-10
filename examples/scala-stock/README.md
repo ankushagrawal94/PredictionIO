@@ -65,11 +65,12 @@ bin/elasticsearch
 Where: PredictionIO/conf
 Run
 ```
-mv pio.env.sh.template to .template pio.env.sh
+mv pio.env.sh.template pio.env.sh
 ```
 Now Edit the file: pio.env.sh
 
-change SPARK_HOME=<current address of spark directory>
+Find the following line and fill it in with your spark directory path:
+SPARK_HOME= <current address of spark directory>
 
 ### Step 8: Now make the distribution of PredictionIO
 Where: cloned PredictionIO directory (with source code, make sure code is updated, git pull)
@@ -91,7 +92,7 @@ Hbase
 ElasticSearch
 ```
 ### Step 10: Check Localhost8080
--Navigate to http:localhost8080
+-Navigate to http://localhost:8080
 
 -Should see a master address and worker node
 
@@ -116,7 +117,7 @@ In PredictionIO folder
 
 Type /bin/pio dashboard
 
-go to url: http:localhost900 to view output
+go to url: http://localhost:9000 to view output
 
 
 
