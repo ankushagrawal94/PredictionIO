@@ -10,4 +10,3 @@ Gaurang Patel
 Matthew Schwegler
 
 Jekyll source code under docs/manual
--------------------------------------------
