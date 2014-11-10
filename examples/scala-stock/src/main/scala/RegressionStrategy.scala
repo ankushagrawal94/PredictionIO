@@ -35,7 +35,7 @@ class RegressionStrategy
     result
   }
 
-
+  // Generalized regression
   private def regress2(
     features: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
