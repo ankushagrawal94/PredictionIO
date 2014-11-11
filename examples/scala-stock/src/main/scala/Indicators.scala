@@ -23,7 +23,11 @@ class Indicators {
 	 */
 	def calcRSI(logPrice: Frame[DateTime, String, Double], d: Int) = {
 		val rsFrame = calcRS(logPrice, d)
-		rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
+		val rsiFrame = rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
+
+		// Fill in first 14 days offset with zero
+    	val rsi = rsiFrame.reindexRow(logPrice.rowIx)
+    	rsi.mapVec[Double](_.fillNA(_  => 0.0))
 	}
 
 	/*
