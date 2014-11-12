@@ -56,6 +56,7 @@ class RegressionStrategy
     val logPrice = price.mapValues(math.log)
     val active = dataView.activeFrame(trainingWindowSize) // what is activeFrame?
 
+    //PASS THIS IN AS PARAM
     /* Calling Indicator class */
     println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
@@ -77,7 +78,10 @@ class RegressionStrategy
     val ret1w = getRet(logPrice, shifts(2))
     val ret1m = getRet(logPrice, shifts(3))
     val retF1d = getRet(logPrice, -1)
+    //END OF SECTIONS TO TURN TO PARAMS
 
+    //DEFINE AS CONSTANTS AT THE TOP
+    //OR USE THE MAX OF SHIFTS
     val timeIndex = price.rowIx // WHAT IS ROWIX ???
     val firstIdx = 25 // why start on 25th? -> offset past 22
     val lastIdx = timeIndex.length
@@ -91,7 +95,7 @@ class RegressionStrategy
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
-      val model = regress2( 
+      val model = regress2(
         // Seq(
         // rsi1d.firstCol(ticker).slice(firstIdx, lastIdx),
         // rsi1w.firstCol(ticker).slice(firstIdx, lastIdx),
@@ -101,7 +105,7 @@ class RegressionStrategy
         // ret1m.firstCol(ticker).slice(firstIdx, lastIdx)),
         // Get the tickers
         retSeq.map(s => s.firstCol(ticker).slice(firstIdx, lastIdx)),
-        retF1d.firstCol(ticker).slice(firstIdx, lastIdx)) 
+        retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
 
