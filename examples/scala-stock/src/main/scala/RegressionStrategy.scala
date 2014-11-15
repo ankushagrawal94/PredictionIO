@@ -18,7 +18,7 @@ class RegressionStrategy
   val trainingWindowSize = 200 // data time range in # of days
   val shifts = Seq(0, 1, 5, 22) // days used in regression model
 
-  // Difference in closing prices?
+  // Difference in closing prices
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
@@ -61,29 +61,28 @@ class RegressionStrategy
     println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
     // For loop for making calls to Indicators - fills a sequence with return values
-    val rsi1d = indic.calcRSI(logPrice, shifts(1))
-    val rsi1w = indic.calcRSI(logPrice, shifts(2))
-    val rsi1m = indic.calcRSI(logPrice, shifts(3))
+    //val rsi1d = indic.calcRSI(logPrice, shifts(1))
+    //val rsi1w = indic.calcRSI(logPrice, shifts(2))
+    //val rsi1m = indic.calcRSI(logPrice, shifts(3))
     // val rsiF1d = indic.calcRSI(logPrice, -1) // -1 is not handled by our RSI calculation
     println("RegressionStrategy: finished calling calcRSI")
 
+    val retF1d = getRet(logPrice, -1)
+
+    println("calcRSI 1 day"+rsi1d)
+
     // Calculate feature
     var x = 0
-    var retSeq = Seq[Frame[DateTime,String,Double]]()
+    var retSeq = Seq[Frame[DateTime,String,Double]]();
     for (x <- 1 to shifts.length - 1) {
-      retSeq = retSeq ++ Seq(getRet(logPrice, shifts(x)))
+      retSeq = retSeq ++ Seq(indic.calcRSI(getRet(logPrice, shifts(x)), 14)
     }
-
-    val ret1d = getRet(logPrice, shifts(1))
-    val ret1w = getRet(logPrice, shifts(2))
-    val ret1m = getRet(logPrice, shifts(3))
-    val retF1d = getRet(logPrice, -1)
     //END OF SECTIONS TO TURN TO PARAMS
 
     //DEFINE AS CONSTANTS AT THE TOP
     //OR USE THE MAX OF SHIFTS
     val timeIndex = price.rowIx // WHAT IS ROWIX ???
-    val firstIdx = 25 // why start on 25th? -> offset past 22
+    val firstIdx = 25 // why start on 25th? -> only data past offset of 22 matters
     val lastIdx = timeIndex.length
 
     // What is this?

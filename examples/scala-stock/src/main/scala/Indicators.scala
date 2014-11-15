@@ -26,14 +26,15 @@ class Indicators {
 		val rsiFrame = rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
 
 		// Fill in first 14 days offset with zero
-    	val rsi = rsiFrame.reindexRow(logPrice.rowIx)
-    	rsi.mapVec[Double](_.fillNA(_  => 0.0))
+  	val rsi = rsiFrame.reindexRow(logPrice.rowIx)
+  	rsi.mapVec[Double](_.fillNA(_  => 0.0))
+
 	}
 
 	/*
 	* @authors - Matt & Leta
-	*Tested the following functions using simple calles in
-	*the interpreter. need to find way to test on the whole.
+	* Tested the following functions using simple calls in
+	* the interpreter. Need to find way to test on the whole.
 	*/
 	private def calcRS(logPrice: Frame[DateTime, String, Double], period: Int) = {
 		//(logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
@@ -46,20 +47,20 @@ class Indicators {
 		val negFrame = logPrice.mapValues[Double]( (x:Double) => if (x < 0) x else 0)
 		println("calcRS: Found negative vecs")
 
-		//Get the sum of positive Framse
-		val sumPosFrame = posFrame.rolling[Double] (14, (f: Series[DateTime,Double]) => f.mean  )
+		//Get the sum of positive Frame
+		val avgPosFrame = posFrame.rolling[Double] (period, (f: Series[DateTime,Double]) => f.mean)
 		println("calcRS: Found sum of positive frames")
 
 		//Get sum of negative
-		val sumNegFrame = negFrame.rolling[Double] (14, (f: Series[DateTime,Double]) => f.mean  )
+		val avgNegFrame = negFrame.rolling[Double] (period, (f: Series[DateTime,Double]) => f.mean)
 		println("calcRS: Found sum of negative frames")
 
-		val rsFrame = sumPosFrame/sumNegFrame
+		val rsFrame = avgPosFrame/avgNegFrame
 		println("calcRS: Found rsFrame")
 
 		println("calcRS: Returning from calcRS")
 
 		rsFrame
 	}
-	
+
 }
