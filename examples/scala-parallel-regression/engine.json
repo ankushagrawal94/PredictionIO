@@ -1,7 +1,0 @@
-
-{
-  "id": "scala-parallel-regression",
-  "version": "0.0.1-SNAPSHOT",
-  "name": "scala-parallel-regression",
-  "engineFactory": "io.prediction.examples.regression.parallel.RegressionEngineFactory"
-}

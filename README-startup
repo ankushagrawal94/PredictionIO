@@ -1,4 +1,0 @@
-To use the startup scripts, the first time you must correctly replace /Development/predictionIO to your appropriate directory
-
-After this, you can run: ./startElastic.sh
-Then open a new terminal and run ./completeSetup.sh
