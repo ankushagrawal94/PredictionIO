@@ -13,6 +13,8 @@ import scala.math
 
 import nak.regress.LinearRegression
 
+
+//test code change
 class RegressionStrategy
     extends StockStrategy[Map[String, DenseVector[Double]]] {
   val trainingWindowSize = 200 // data time range in # of days
