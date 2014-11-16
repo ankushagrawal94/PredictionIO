@@ -60,11 +60,6 @@ class RegressionStrategy
     /* Calling Indicator class */
     println("RegressionStrategy: calling calcRSI")
     val indic = new Indicators()
-    // For loop for making calls to Indicators - fills a sequence with return values
-    //val rsi1d = indic.calcRSI(logPrice, shifts(1))
-    //val rsi1w = indic.calcRSI(logPrice, shifts(2))
-    //val rsi1m = indic.calcRSI(logPrice, shifts(3))
-    // val rsiF1d = indic.calcRSI(logPrice, -1) // -1 is not handled by our RSI calculation
     println("RegressionStrategy: finished calling calcRSI")
 
     val retF1d = getRet(logPrice, -1)
