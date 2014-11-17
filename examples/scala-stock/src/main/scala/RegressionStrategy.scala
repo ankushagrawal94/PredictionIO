@@ -15,43 +15,35 @@ import nak.regress.LinearRegression
 
 
 //test code change
-class RegressionStrategy
+class RegressionStrategy (
+  trainingWindowSize: Int,
+  shifts: Seq[Int],
+  features: Seq[Series[ (Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double] ]])
     extends StockStrategy[Map[String, DenseVector[Double]]] {
-  val trainingWindowSize = 200 // data time range in # of days
-  val shifts = Seq(0, 1, 5, 22) // days used in regression model
+  /*val trainingWindowSize = 200 // data time range in # of days
+  val shifts = Seq(0, 1, 5, 22) // days used in regression model*/
 
-  // Difference in closing prices
+  //Most minimal constructor? How to make sure length is correct?
+  def this(features: Seq[Series[ (Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double] ]])) {
+    this(200, (Array.fill(1)(0) ++ Array.fill(features.length)(1)).toSeq, features)
+  }
+
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
-  // Justin's regress
-  // private def regress(
-  //   ret1d: Series[DateTime, Double],
-  //   ret1w: Series[DateTime, Double],
-  //   ret1m: Series[DateTime, Double],
-  //   retF1d: Series[DateTime, Double]) = {
-  //   val array = (
-  //     Seq(ret1d, ret1w, ret1m).map(_.toVec.contents).reduce(_ ++ _) ++
-  //     Array.fill(ret1d.length)(1.0))
-  //   val target = DenseVector[Double](retF1d.toVec.contents)
-  //   val m = DenseMatrix.create[Double](ret1d.length, 4, array)
-  //   val result = LinearRegression.regress(m, target)
-  //   result
-  // }
-
-  // Generalized regression
-  private def regress2(
-    features: Seq[Series[DateTime, Double]],
+  private def regress(
+    calculatedData: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
     val array = (
-      features.map(_.toVec.contents).reduce(_ ++ _) ++
+      calculatedData.map(_.toVec.contents).reduce(_ ++ _) ++
       Array.fill(retF1d.length)(1.0))
     val target = DenseVector[Double](retF1d.toVec.contents)
-    val m = DenseMatrix.create[Double](retF1d.length, features.length + 1, array)
+    val m = DenseMatrix.create[Double](retF1d.length, calculatedData.length + 1, array)
     val result = LinearRegression.regress(m, target)
     result
   }
 
+  /* Train */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // trainingWindowSize - data time range
     val price = dataView.priceFrame(trainingWindowSize) // map from ticker to array of stock prices
@@ -60,26 +52,26 @@ class RegressionStrategy
 
     //PASS THIS IN AS PARAM
     /* Calling Indicator class */
-    println("RegressionStrategy: calling calcRSI")
-    val indic = new Indicators()
-    println("RegressionStrategy: finished calling calcRSI")
+    //println("RegressionStrategy: calling calcRSI")
+    //val indic = new Indicators()
+    //println("RegressionStrategy: finished calling calcRSI")
 
-    val retF1d = getRet(logPrice, -1)
 
-    println("calcRSI 1 day"+rsi1d)
-
-    // Calculate feature
+    // Calculate data with corresponding features
     var x = 0
-    var retSeq = Seq[Frame[DateTime,String,Double]]();
+    var retSeq = Seq[Frame[DateTime,String,Double]]()
     for (x <- 1 to shifts.length - 1) {
-      retSeq = retSeq ++ Seq(indic.calcRSI(getRet(logPrice, shifts(x)), 14)
+      retSeq = retSeq ++ Seq(features(x)(logPrice, shifts(x)))
     }
-    //END OF SECTIONS TO TURN TO PARAMS
+
+    //Calculate target data returns
+    val retF1d = getRet(logPrice, -1)
 
     //DEFINE AS CONSTANTS AT THE TOP
     //OR USE THE MAX OF SHIFTS
     val timeIndex = price.rowIx // WHAT IS ROWIX ???
-    val firstIdx = 25 // why start on 25th? -> only data past offset of 22 matters
+    //val firstIdx = 25 // why start on 25th? -> only data past offset of 22 matters
+    val firstIdx = shifts.max + 3
     val lastIdx = timeIndex.length
 
     // What is this?
@@ -91,15 +83,8 @@ class RegressionStrategy
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
-      val model = regress2(
-        // Seq(
-        // rsi1d.firstCol(ticker).slice(firstIdx, lastIdx),
-        // rsi1w.firstCol(ticker).slice(firstIdx, lastIdx),
-        // rsi1m.firstCol(ticker).slice(firstIdx, lastIdx)),
-        // ret1d.firstCol(ticker).slice(firstIdx, lastIdx),
-        // ret1w.firstCol(ticker).slice(firstIdx, lastIdx),
-        // ret1m.firstCol(ticker).slice(firstIdx, lastIdx)),
-        // Get the tickers
+      val model = regress(
+        // Only pass in relevant data
         retSeq.map(s => s.firstCol(ticker).slice(firstIdx, lastIdx)),
         retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
@@ -109,43 +94,33 @@ class RegressionStrategy
     tickerModelMap
   }
 
-  // Justin's predictOne
-  // private def predictOne(
-  //   coef: DenseVector[Double],
-  //   price: Series[DateTime, Double]): Double = {
-  //   val shifts = Seq(0, 1, 5, 22)
-  //   val sp = shifts
-  //     .map(s => (s, math.log(price.raw(price.length - s - 1))))
-  //     .toMap
-
-  //   val vec = DenseVector[Double](
-  //     sp(0) - sp(1),
-  //     sp(0) - sp(5),
-  //     sp(0) - sp(22),
-  //     1)
-
-  //   val p = coef.dot(vec)
-  //   return p
-  // }
-
-  // General predictOne
-  private def predictOne2(
+  private def predictOne(
     coef: DenseVector[Double],
     price: Series[DateTime, Double]): Double = {
     val sp = shifts
       .map(s => (s, math.log(price.raw(price.length - s - 1))))
       .toMap
 
-    val vec = DenseVector[Double](
-      sp(shifts(0)) - sp(shifts(1)),
-      sp(shifts(0)) - sp(shifts(2)),
-      sp(shifts(0)) - sp(shifts(3)),
-      1)
+    var densVecArray = Array[Double]();
+    var x = 0
+    for (x <- 1 to shifts.length - 1) {
+      densVecArray = densVecArray ++ Array(sp(shifts(0)) - sp(shifts(x)))
+    }
+
+    densVecArray = densVecArray ++ Array(1)
+    val vec = DenseVector[Double](densVecArray)
+
+    //val vec = DenseVector[Double](
+    //  sp(shifts(0)) - sp(shifts(1)),
+    //  sp(shifts(0)) - sp(shifts(2)),
+    //  sp(shifts(0)) - sp(shifts(3)),
+    //  1)
 
     val p = coef.dot(vec)
     return p
   }
 
+  /* Predict */
   def onClose(model: Map[String, DenseVector[Double]], query: Query)
   : Prediction = {
     val dataView = query.dataView
@@ -156,7 +131,7 @@ class RegressionStrategy
     val prediction = query.tickers
       .filter(ticker => model.contains(ticker))
       .map { ticker => {
-        val p = predictOne2(
+        val p = predictOne(
           model(ticker),
           price.firstCol(ticker))
         (ticker, p)

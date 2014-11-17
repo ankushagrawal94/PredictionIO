@@ -17,12 +17,15 @@ import nak.regress.LinearRegression
 
 class Indicators {
 
+	private def getRet(logPrice: Frame[DateTime, String, Double], period: Int) =
+		(logPrice - logPrice.shift(period)).mapVec[Double](_.fillNA(_ => 0.0))
+
 	/*  RSI
 	 *  Input: logPrice: Frame[DateTime, String, Double], d: Int
 	 *  Return: Same frame
 	 */
-	def calcRSI(logPrice: Frame[DateTime, String, Double], d: Int) = {
-		val rsFrame = calcRS(logPrice, d)
+	def calcRSI(logPrice: Frame[DateTime, String, Double], returnPeriod: Int) = {
+		val rsFrame = calcRS(getRet(logPrice, returnPeriod), 14)
 		val rsiFrame = rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
 
 		// Fill in first 14 days offset with zero
