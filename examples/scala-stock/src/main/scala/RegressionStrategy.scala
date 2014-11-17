@@ -64,13 +64,11 @@ class RegressionStrategy
 
     val retF1d = getRet(logPrice, -1)
 
-    println("calcRSI 1 day"+rsi1d)
-
     // Calculate feature
     var x = 0
     var retSeq = Seq[Frame[DateTime,String,Double]]();
     for (x <- 1 to shifts.length - 1) {
-      retSeq = retSeq ++ Seq(indic.calcRSI(getRet(logPrice, shifts(x)), 14)
+      retSeq = retSeq ++ Seq(indic.calcRSI(getRet(logPrice, shifts(x)), 14))
     }
     //END OF SECTIONS TO TURN TO PARAMS
 
