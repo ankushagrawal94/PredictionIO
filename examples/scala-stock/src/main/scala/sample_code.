@@ -3,6 +3,8 @@ abstract class BaseIndicator {
   def getTraining(input: Series[DateTime, Double]): Series[DateTime, Double]
   // used in onClose
   def getOne(input: Series[DateTime, Double]): Double
+  // 
+  def minFrameSize(): Int
 }
 
 class RSIIndicator(val k: Int) extends BaseIndicator {
