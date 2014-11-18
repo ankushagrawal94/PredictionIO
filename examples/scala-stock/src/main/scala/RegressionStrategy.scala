@@ -18,13 +18,13 @@ import nak.regress.LinearRegression
 class RegressionStrategy (
   trainingWindowSize: Int,
   shifts: Seq[Int],
-  features: Seq[Series[ (Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double] ]])
+  features: Seq[(Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double]]
     extends StockStrategy[Map[String, DenseVector[Double]]] {
   /*val trainingWindowSize = 200 // data time range in # of days
   val shifts = Seq(0, 1, 5, 22) // days used in regression model*/
 
   //Most minimal constructor? How to make sure length is correct?
-  def this(features: Seq[Series[ (Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double] ]])) {
+  def this(features: Seq[(Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double]) {
     this(200, (Array.fill(1)(0) ++ Array.fill(features.length)(1)).toSeq, features)
   }
 
