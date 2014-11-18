@@ -1,0 +1,39 @@
+abstract class BaseIndicator {
+  // used in createModel
+  def getTraining(input: Series[DateTime, Double]): Series[DateTime, Double]
+  // used in onClose
+  def getOne(input: Series[DateTime, Double]): Double
+}
+
+class RSIIndicator(val k: Int) extends BaseIndicator {
+  def getTraining(...) = {...}
+  def getOne(...) = {...}
+}
+
+case class RegressionStrategyParams(
+  indicators: Seq[(String, BaseIndicator)], maxTrainingWindow:Int) extends Params
+
+class RegressionStrategy(val params: RegressionStrategyParams) extends StockStrategy[Map[...]] {
+  def createModel(dataView: DataView): ... = {
+    val tickerFeatureusMaps = params.indicators.map { ... }
+  }
+
+  def onClose(...) = {
+    // call getOne here.
+  }
+}
+
+object YahooDataSourceRun {
+  def main(...) {
+    val rsp = RegressionStrategyParams(
+      indicators = Seq(
+        ("RSI5", new RSIIndicator(5)),
+        ("RSI10", new RSIIndicator(10)),
+        ("MA30", new MAIndicator(30))))
+        
+    
+  }
+}
+
+
+
