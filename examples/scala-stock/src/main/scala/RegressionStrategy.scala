@@ -1,5 +1,6 @@
 package io.prediction.examples.stock
 
+import io.prediction.controller.Params
 import org.saddle._
 import org.saddle.index.IndexTime
 
@@ -13,84 +14,78 @@ import scala.math
 
 import nak.regress.LinearRegression
 
+case class RegressionStrategyParams (
+  indicators: Seq[(String, BaseIndicator)],  // (ticker, indicator)
+  maxTrainingWindowSize: Int,
+  offset: Int
+) extends Params
 
-//test code change
-class RegressionStrategy (
-  trainingWindowSize: Int,
-  shifts: Seq[Int],
-  features: Seq[(Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double]]
+class RegressionStrategy (params: RegressionStrategyParams)
     extends StockStrategy[Map[String, DenseVector[Double]]] {
-  /*val trainingWindowSize = 200 // data time range in # of days
-  val shifts = Seq(0, 1, 5, 22) // days used in regression model*/
+  //val trainingWindowSize = 200 // data time range in # of days
+  val shifts = Seq(0, 1) // days used in regression model
 
-  //Most minimal constructor? How to make sure length is correct?
-  def this(features: Seq[(Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double]) {
-    this(200, (Array.fill(1)(0) ++ Array.fill(features.length)(1)).toSeq, features)
-  }
-
-  private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
+  /* Get price differences by period of days d */
+  private def getRet(logPrice: Frame[DateTime, String, Double], d: Int): Frame[DateTime, String, Double] =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
   private def regress(
-    calculatedData: Seq[Series[DateTime, Double]],
-    retF1d: Series[DateTime, Double]) = {
+    features: Seq[Series[DateTime, Double]],
+    retF1d: Series[DateTime, Double]): DenseVector[Double] = {
     val array = (
-      calculatedData.map(_.toVec.contents).reduce(_ ++ _) ++
+      features.map(_.toVec.contents).reduce(_ ++ _) ++
       Array.fill(retF1d.length)(1.0))
     val target = DenseVector[Double](retF1d.toVec.contents)
-    val m = DenseMatrix.create[Double](retF1d.length, calculatedData.length + 1, array)
+    val m = DenseMatrix.create[Double](retF1d.length, features.length + 1, array)
     val result = LinearRegression.regress(m, target)
     result
   }
 
+  /*
+   * Return sequence of all series calculated for a particular ticker based on
+   * any incoming indicators that correspond to the ticker.
+   */
+  private def findAllTickerIndicated(
+    tickerSeries: Series[DateTime, Double],
+    ticker: String): Seq[Series[DateTime, Double]] = {
+    var regressSeq = Seq[Series[DateTime, Double]]()
+    for (x <- 0 to params.indicators.length-1) {
+      if (params.indicators(x)._1 == ticker)
+        regressSeq = regressSeq ++ Seq[Series[DateTime, Double]](params.indicators(x)._2.getTraining(tickerSeries))
+    }
+    println("regressSeq for "+ticker+": "+regressSeq)
+    regressSeq
+  }
+
   /* Train */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
+
     // trainingWindowSize - data time range
-    val price = dataView.priceFrame(trainingWindowSize) // map from ticker to array of stock prices
+    val price = dataView.priceFrame(params.maxTrainingWindowSize)
     val logPrice = price.mapValues(math.log)
-    val active = dataView.activeFrame(trainingWindowSize) // what is activeFrame?
+    val active = dataView.activeFrame(params.maxTrainingWindowSize)
 
-    //PASS THIS IN AS PARAM
-    /* Calling Indicator class */
-    //println("RegressionStrategy: calling calcRSI")
-    //val indic = new Indicators()
-    //println("RegressionStrategy: finished calling calcRSI")
-
-
-    // Calculate data with corresponding features
-    var x = 0
-    var retSeq = Seq[Frame[DateTime,String,Double]]()
-    for (x <- 1 to shifts.length - 1) {
-      retSeq = retSeq ++ Seq(features(x)(logPrice, shifts(x)))
-    }
-
-    //Calculate target data returns
+    //Calculate target frame
     val retF1d = getRet(logPrice, -1)
 
-    //DEFINE AS CONSTANTS AT THE TOP
-    //OR USE THE MAX OF SHIFTS
-    val timeIndex = price.rowIx // WHAT IS ROWIX ???
+    val timeIndex = price.rowIx
     //val firstIdx = 25 // why start on 25th? -> only data past offset of 22 matters
-    val firstIdx = shifts.max + 3
+    val firstIdx = params.offset
     val lastIdx = timeIndex.length
 
-    // What is this?
     val tickers = price.colIx.toVec.contents
 
-    // Why are you using the first column? What is findOne?
-    // Is this a validity test for the data set - filtering out the non-active tickers?
-    // returns a 1D array - time series
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
       val model = regress(
         // Only pass in relevant data
-        retSeq.map(s => s.firstCol(ticker).slice(firstIdx, lastIdx)),
-        retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
+        findAllTickerIndicated(logPrice.firstCol(ticker), ticker).slice(firstIdx, lastIdx),
+        retF1d.firstCol(ticker).slice(firstIdx, lastIdx)
+      )
       (ticker, model)
     }).toMap
 
-    // What is this mapping the tickers to?
     tickerModelMap
   }
 
@@ -101,20 +96,18 @@ class RegressionStrategy (
       .map(s => (s, math.log(price.raw(price.length - s - 1))))
       .toMap
 
-    var densVecArray = Array[Double]();
-    var x = 0
-    for (x <- 1 to shifts.length - 1) {
-      densVecArray = densVecArray ++ Array(sp(shifts(0)) - sp(shifts(x)))
-    }
+    //var densVecArray = Array[Double]();
+    //var x = 0
+    //for (x <- 1 to shifts.length - 1) {
+    //  densVecArray = densVecArray ++ Array(sp(shifts(0)) - sp(shifts(x)))
+    //}
+    //
+    //densVecArray = densVecArray ++ Array[Double](1)
+    //val vec = DenseVector[Double](densVecArray)
 
-    densVecArray = densVecArray ++ Array(1)
-    val vec = DenseVector[Double](densVecArray)
-
-    //val vec = DenseVector[Double](
-    //  sp(shifts(0)) - sp(shifts(1)),
-    //  sp(shifts(0)) - sp(shifts(2)),
-    //  sp(shifts(0)) - sp(shifts(3)),
-    //  1)
+    val vec = DenseVector[Double](
+      sp(shifts(0)) - sp(shifts(1)),
+      1)
 
     val p = coef.dot(vec)
     return p
