@@ -56,6 +56,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     val logPrice = price.mapValues(math.log)
     val active = dataView.activeFrame(params.maxTrainingWindowSize)
 
+
     //Calculate target data returns
     val retF1d = getRet(logPrice, -1)
 
