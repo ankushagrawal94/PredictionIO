@@ -15,8 +15,14 @@ import math._
 
 import nak.regress.LinearRegression
 
+/*
+ * Base class for indicators. All indicators should be defined as classes that extend
+ * this base class. See RSIIndicator as an example. These indicators can then be
+ * instantiated and passed into RegressionStrategy class.
+ */
 abstract class BaseIndicator extends Serializable {
 	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double]
+	//TODO def getOne(input: Series[DateTime, Double]): Series[DateTime, Double]
 }
 
 class RSIIndicator(period: Int) extends BaseIndicator {

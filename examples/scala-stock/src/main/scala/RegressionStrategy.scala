@@ -18,17 +18,15 @@ import nak.regress.LinearRegression
 case class RegressionStrategyParams (
   indicators: Seq[(String, BaseIndicator)],  // (indicKey, indicator)
   maxTrainingWindowSize: Int
-  //offset: Int
 ) extends Params
 
 class RegressionStrategy (params: RegressionStrategyParams) extends StockStrategy[Map[String, DenseVector[Double]]] {
-  //val trainingWindowSize = 200 // data time range in # of days
   val shifts = Seq(0, 1, 5, 22) // days used in regression model*/
 
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
-  //regress on a particular ticker
+  /* Regress on a particular ticker */
   private def regress(
     calculatedData: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
@@ -41,6 +39,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     result
   }
 
+  /* Apply indicators to a particular ticker series */
   private def getIndicSeq(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
     var retSeq = Seq[Series[DateTime, Double]]()
     var x = 0
@@ -48,33 +47,26 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
       retSeq = retSeq ++ Seq(params.indicators(x)._2.getTraining(logPrice))
     }
     retSeq
-    //val indic = new RSIIndicator()
-    //Seq[Series[DateTime, Double]](
-    //  indic.getTraining(logPrice, shifts(1)),
-    //  indic.getTraining(logPrice, shifts(2)),
-    //  indic.getTraining(logPrice, shifts(3))
-    //)
   }
 
-  /* Train */
+  /* Helper for train */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // trainingWindowSize - data time range
     val price = dataView.priceFrame(params.maxTrainingWindowSize) // map from ticker to array of stock prices
     val logPrice = price.mapValues(math.log)
-    val active = dataView.activeFrame(params.maxTrainingWindowSize) // what is activeFrame?
+    val active = dataView.activeFrame(params.maxTrainingWindowSize)
 
     //Calculate target data returns
     val retF1d = getRet(logPrice, -1)
 
-    val timeIndex = price.rowIx // WHAT IS ROWIX ??? --> row indices
-    //val firstIdx = 25 // why start on 25th? -> only data past offset of 22 matters
+    val timeIndex = price.rowIx // Get row indices
     val firstIdx = shifts.max + 3
     val lastIdx = timeIndex.length
 
-    // What is this? --> an array-ish of all ticker strings
+    // Get array of all ticker strings
     val tickers = price.colIx.toVec.contents
 
-    //TODO for each active ticker, pass in an indicated series into regress
+    // For each active ticker, pass in an indicated series into regress
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
@@ -115,7 +107,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     return p
   }
 
-  /* Predict */
+  /* Helper for predict */
   def onClose(model: Map[String, DenseVector[Double]], query: Query)
   : Prediction = {
     val dataView = query.dataView
