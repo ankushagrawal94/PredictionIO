@@ -16,7 +16,7 @@ import scala.math
 import nak.regress.LinearRegression
 
 case class RegressionStrategyParams (
-  //indicators: Seq[(String, BaseIndicator)],  // (ticker, indicator)
+  indicators: Seq[(String, BaseIndicator)],  // (indicKey, indicator)
   maxTrainingWindowSize: Int
   //offset: Int
 ) extends Params
@@ -42,12 +42,18 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   }
 
   private def getIndicSeq(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
-    val indic = new RSIIndicator()
-    Seq[Series[DateTime, Double]](
-      indic.getTraining(logPrice, shifts(1)),
-      indic.getTraining(logPrice, shifts(2)),
-      indic.getTraining(logPrice, shifts(3))
-    )
+    var retSeq = Seq[Series[DateTime, Double]]()
+    var x = 0
+    for (x <- 0 to params.indicators.length - 1) {
+      retSeq = retSeq ++ Seq(params.indicators(x)._2.getTraining(logPrice))
+    }
+    retSeq
+    //val indic = new RSIIndicator()
+    //Seq[Series[DateTime, Double]](
+    //  indic.getTraining(logPrice, shifts(1)),
+    //  indic.getTraining(logPrice, shifts(2)),
+    //  indic.getTraining(logPrice, shifts(3))
+    //)
   }
 
   /* Train */
@@ -56,20 +62,6 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     val price = dataView.priceFrame(params.maxTrainingWindowSize) // map from ticker to array of stock prices
     val logPrice = price.mapValues(math.log)
     val active = dataView.activeFrame(params.maxTrainingWindowSize) // what is activeFrame?
-
-    //PASS THIS IN AS PARAM
-    /* Calling Indicator class */
-    //println("RegressionStrategy: calling calcRSI")
-    //val indic = new RSIIndicator()
-    //println("RegressionStrategy: finished calling calcRSI")
-
-
-    // Calculate data with corresponding features
-    //var x = 0
-    //var retSeq = Seq[Frame[DateTime,String,Double]]()
-    //for (x <- 1 to shifts.length - 1) {
-    //  retSeq = retSeq ++ Seq(indic.getTraining(logPrice, shifts(x)))
-    //}
 
     //Calculate target data returns
     val retF1d = getRet(logPrice, -1)

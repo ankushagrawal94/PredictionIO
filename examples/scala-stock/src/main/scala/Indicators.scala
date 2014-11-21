@@ -15,33 +15,17 @@ import math._
 
 import nak.regress.LinearRegression
 
-abstract class BaseIndicator {
-	def getTraining(logPrice: Series[DateTime, Double], returnPeriod: Int): Series[DateTime, Double]
+abstract class BaseIndicator extends Serializable {
+	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double]
 }
 
-class RSIIndicator extends BaseIndicator {
+class RSIIndicator(period: Int) extends BaseIndicator {
 
-	//private def getRet(logPrice: Frame[DateTime, String, Double], period: Int) =
-	//	(logPrice - logPrice.shift(period)).mapVec[Double](_.fillNA(_ => 0.0))
-
-	private def getRet(logPrice: Series[DateTime, Double], period: Int) =
+	private def getRet(logPrice: Series[DateTime, Double]) =
 		(logPrice - logPrice.shift(period)).fillNA(_ => 0.0)
 
-	/*  RSI
-	 *  Input: logPrice: Frame[DateTime, String, Double], d: Int
-	 *  Return: Same frame
-	 */
-	//def getTraining(logPrice: Frame[DateTime, String, Double], returnPeriod: Int) = {
-	//	val rsFrame = calcRS(getRet(logPrice, returnPeriod), 14)
-	//	val rsiFrame = rsFrame.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
-	//
-	//	// Fill in first 14 days offset with zero
-  //	val rsi = rsiFrame.reindexRow(logPrice.rowIx)
-  //	rsi.mapVec[Double](_.fillNA(_  => 0.0))
-	//}
-
-	def getTraining(logPrice: Series[DateTime, Double], returnPeriod: Int): Series[DateTime, Double] = {
-		val rsSeries = calcRS(getRet(logPrice, returnPeriod), 14)
+	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
+		val rsSeries = calcRS(getRet(logPrice), 14)
 		val rsiSeries = rsSeries.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
 
 		// Fill in first 14 days offset with zero
