@@ -1,5 +1,7 @@
 package io.prediction.examples.stock
 
+import io.prediction.controller.Params
+
 import org.saddle._
 import org.saddle.index.IndexTime
 
@@ -13,79 +15,80 @@ import scala.math
 
 import nak.regress.LinearRegression
 
+case class RegressionStrategyParams (
+  //indicators: Seq[(String, BaseIndicator)],  // (ticker, indicator)
+  maxTrainingWindowSize: Int
+  //offset: Int
+) extends Params
 
-//test code change
-class RegressionStrategy (
-  trainingWindowSize: Int,
-  shifts: Seq[Int],
-  features: Seq[(Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double]]
-    extends StockStrategy[Map[String, DenseVector[Double]]] {
-  /*val trainingWindowSize = 200 // data time range in # of days
+class RegressionStrategy (params: RegressionStrategyParams) extends StockStrategy[Map[String, DenseVector[Double]]] {
+  //val trainingWindowSize = 200 // data time range in # of days
   val shifts = Seq(0, 1, 5, 22) // days used in regression model*/
-
-  //Most minimal constructor? How to make sure length is correct?
-  def this(features: Seq[(Frame[DateTime, String, Double], Int) => Frame[DateTime, String, Double]) {
-    this(200, (Array.fill(1)(0) ++ Array.fill(features.length)(1)).toSeq, features)
-  }
 
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
+  //regress on a particular ticker
   private def regress(
     calculatedData: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
     val array = (
-      calculatedData.map(_.toVec.contents).reduce(_ ++ _) ++
-      Array.fill(retF1d.length)(1.0))
+      calculatedData.map(_.toVec.contents).reduce(_++_) ++
+      Array.fill(retF1d.length)(1.0)).toArray[Double]
     val target = DenseVector[Double](retF1d.toVec.contents)
     val m = DenseMatrix.create[Double](retF1d.length, calculatedData.length + 1, array)
     val result = LinearRegression.regress(m, target)
     result
   }
 
+  private def getIndicSeq(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
+    val indic = new RSIIndicator()
+    Seq[Series[DateTime, Double]](
+      indic.getTraining(logPrice, shifts(1)),
+      indic.getTraining(logPrice, shifts(2)),
+      indic.getTraining(logPrice, shifts(3))
+    )
+  }
+
   /* Train */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // trainingWindowSize - data time range
-    val price = dataView.priceFrame(trainingWindowSize) // map from ticker to array of stock prices
+    val price = dataView.priceFrame(params.maxTrainingWindowSize) // map from ticker to array of stock prices
     val logPrice = price.mapValues(math.log)
-    val active = dataView.activeFrame(trainingWindowSize) // what is activeFrame?
+    val active = dataView.activeFrame(params.maxTrainingWindowSize) // what is activeFrame?
 
     //PASS THIS IN AS PARAM
     /* Calling Indicator class */
     //println("RegressionStrategy: calling calcRSI")
-    //val indic = new Indicators()
+    //val indic = new RSIIndicator()
     //println("RegressionStrategy: finished calling calcRSI")
 
 
     // Calculate data with corresponding features
-    var x = 0
-    var retSeq = Seq[Frame[DateTime,String,Double]]()
-    for (x <- 1 to shifts.length - 1) {
-      retSeq = retSeq ++ Seq(features(x)(logPrice, shifts(x)))
-    }
+    //var x = 0
+    //var retSeq = Seq[Frame[DateTime,String,Double]]()
+    //for (x <- 1 to shifts.length - 1) {
+    //  retSeq = retSeq ++ Seq(indic.getTraining(logPrice, shifts(x)))
+    //}
 
     //Calculate target data returns
     val retF1d = getRet(logPrice, -1)
 
-    //DEFINE AS CONSTANTS AT THE TOP
-    //OR USE THE MAX OF SHIFTS
-    val timeIndex = price.rowIx // WHAT IS ROWIX ???
+    val timeIndex = price.rowIx // WHAT IS ROWIX ??? --> row indices
     //val firstIdx = 25 // why start on 25th? -> only data past offset of 22 matters
     val firstIdx = shifts.max + 3
     val lastIdx = timeIndex.length
 
-    // What is this?
+    // What is this? --> an array-ish of all ticker strings
     val tickers = price.colIx.toVec.contents
 
-    // Why are you using the first column? What is findOne?
-    // Is this a validity test for the data set - filtering out the non-active tickers?
-    // returns a 1D array - time series
+    //TODO for each active ticker, pass in an indicated series into regress
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
       val model = regress(
         // Only pass in relevant data
-        retSeq.map(s => s.firstCol(ticker).slice(firstIdx, lastIdx)),
+        getIndicSeq(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
         retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
@@ -104,10 +107,10 @@ class RegressionStrategy (
     var densVecArray = Array[Double]();
     var x = 0
     for (x <- 1 to shifts.length - 1) {
-      densVecArray = densVecArray ++ Array(sp(shifts(0)) - sp(shifts(x)))
+      densVecArray = densVecArray ++ Array[Double](sp(shifts(0)) - sp(shifts(x)))
     }
 
-    densVecArray = densVecArray ++ Array(1)
+    densVecArray = densVecArray ++ Array[Double](1)
     val vec = DenseVector[Double](densVecArray)
 
     //val vec = DenseVector[Double](
