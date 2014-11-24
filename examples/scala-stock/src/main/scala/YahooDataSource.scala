@@ -445,7 +445,7 @@ object YahooDataSourceRun {
         "" -> classOf[RegressionStrategy]
       )),
       //algorithmParamsList = Seq(("", momentumParams)),
-      algorithmParamsList = Seq(("", RegressionStrategyParams(Seq[(String, BaseIndicator)](("rsi shift 1", new RSIIndicator(3)), ("rsi shift 5", new RSIIndicator(1)), ("rsi shift 22", new RSIIndicator(12))), 200))),
+      algorithmParamsList = Seq(("", RegressionStrategyParams(Seq[(String, BaseIndicator)](("rsi shift 1", new RSIIndicator(onCloseWindowSize=30, period=3)), ("rsi shift 5", new RSIIndicator(onCloseWindowSize=30, period=1)), ("rsi shift 22", new RSIIndicator(onCloseWindowSize=30, period=12))), 200))),
       servingClassOpt = Some(FirstServing(classOf[EmptyStrategy])),
       metricsClassOpt = Some(classOf[BacktestingMetrics]),
       metricsParams = metricsParams,

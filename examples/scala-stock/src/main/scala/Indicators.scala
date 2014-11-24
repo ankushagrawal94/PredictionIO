@@ -22,22 +22,16 @@ import nak.regress.LinearRegression
  */
 abstract class BaseIndicator extends Serializable {
 	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double]
-	//TODO def getOne(input: Series[DateTime, Double]): Double
+	def getOne(input: Series[DateTime, Double]): Double
+	def minWindowSize(): Int
 }
 
-class RSIIndicator(period: Int) extends BaseIndicator {
+class RSIIndicator(onCloseWindowSize: Int = 14, period: Int) extends BaseIndicator {
 
 	private def getRet(logPrice: Series[DateTime, Double]) =
 		(logPrice - logPrice.shift(period)).fillNA(_ => 0.0)
 
-	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
-		val rsSeries = calcRS(getRet(logPrice), 14)
-		val rsiSeries = rsSeries.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
-
-		// Fill in first 14 days offset with zero
-		rsiSeries.reindex(logPrice.rowIx).fillNA(_  => 0.0)
-	}
-
+	def minWindowSize(): Int = onCloseWindowSize
 	/*
 	* @authors - Matt & Leta
 	* Tested the following functions using simple calls in
@@ -68,6 +62,25 @@ class RSIIndicator(period: Int) extends BaseIndicator {
 		println("calcRS: Returning from calcRS")
 
 		rsSeries
+	}
+
+	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
+		val rsSeries = calcRS(getRet(logPrice), 14)
+		val rsiSeries = rsSeries.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
+
+		// Fill in first 14 days offset with zero
+		rsiSeries.reindex(logPrice.rowIx).fillNA(_  => 0.0)
+	}
+
+	def getOne(logPrice: Series[DateTime, Double]): Double = {
+		//Series[DateTime, Double] sliced = logPrice.slice(logPrice.length-1-onCloseWindowSize, logPrice.length)
+		//val rsSeries= calcRS(getRet(sliced), 14)
+		//val rsiSeries = rsSeries.mapValues[Double] ((x: Double) => 100 - (100/(1 + x)))
+		//rsiSeries.last
+
+		val rsSeries = calcRS(getRet(logPrice), 14)
+		val rsiSeries = rsSeries.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
+		rsiSeries.last
 	}
 
 }

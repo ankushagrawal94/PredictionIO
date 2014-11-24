@@ -85,14 +85,14 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   private def predictOne(
     coef: DenseVector[Double],
     price: Series[DateTime, Double]): Double = {
-    val sp = shifts
-      .map(s => (s, math.log(price.raw(price.length - s - 1))))
-      .toMap
+    //val sp = shifts
+    //  .map(s => (s, math.log(price.raw(price.length - s - 1))))
+    //  .toMap
 
     var densVecArray = Array[Double]();
     var x = 0
-    for (x <- 1 to shifts.length - 1) {
-      densVecArray = densVecArray ++ Array[Double](sp(shifts(0)) - sp(shifts(x)))
+    for (x <- 0 to params.indicators.length - 1) {
+      densVecArray = densVecArray ++ Array[Double](params.indicators(x)._2.getOne(price))
     }
 
     densVecArray = densVecArray ++ Array[Double](1)
@@ -113,15 +113,16 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   : Prediction = {
     val dataView = query.dataView
 
-    val price = dataView.priceFrame(windowSize = 30)
-    //val logPrice = price.mapValues(math.log)
+    //val price = dataView.priceFrame(windowSize = 30)
+    val price = dataView.priceFrame()
+    val logPrice = price.mapValues(math.log)
 
     val prediction = query.tickers
       .filter(ticker => model.contains(ticker))
       .map { ticker => {
         val p = predictOne(
           model(ticker),
-          price.firstCol(ticker))
+          logPrice.firstCol(ticker))
         (ticker, p)
       }}
 
