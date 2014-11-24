@@ -84,10 +84,12 @@ class RSIIndicator(onCloseWindowSize: Int = 14, period: Int) extends BaseIndicat
 	}
 }
 
-class ShiftsIndicator(period: Int) extends BaseIndicator {
+class ShiftsIndicator(onCloseWindowSize: Int = 14, period: Int) extends BaseIndicator {
 
 	private def getRet(logPrice: Series[DateTime, Double], frameShift:Int = period) =
 		(logPrice - logPrice.shift(frameShift)).fillNA(_ => 0.0)
+
+	def minWindowSize(): Int = onCloseWindowSize
 
 	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
 		getRet(logPrice)
