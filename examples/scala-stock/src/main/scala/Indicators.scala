@@ -82,5 +82,18 @@ class RSIIndicator(onCloseWindowSize: Int = 14, period: Int) extends BaseIndicat
 		val rsiSeries = rsSeries.mapValues[Double]( (x:Double) => 100 - (100/(1 + x)))
 		rsiSeries.last
 	}
+}
 
+class ShiftsIndicator(period: Int) extends BaseIndicator {
+
+	private def getRet(logPrice: Series[DateTime, Double], frameShift:Int = period) =
+		(logPrice - logPrice.shift(frameShift)).fillNA(_ => 0.0)
+
+	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
+		getRet(logPrice)
+	}
+
+	def getOne(input: Series[DateTime, Double]): Double = {
+		getRet(input).last
+	}
 }
