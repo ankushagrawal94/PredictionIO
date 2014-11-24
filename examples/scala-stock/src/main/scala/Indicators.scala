@@ -22,7 +22,7 @@ import nak.regress.LinearRegression
  */
 abstract class BaseIndicator extends Serializable {
 	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double]
-	//TODO def getOne(input: Series[DateTime, Double]): Series[DateTime, Double]
+	//TODO def getOne(input: Series[DateTime, Double]): Double
 }
 
 class RSIIndicator(period: Int) extends BaseIndicator {
