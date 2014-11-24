@@ -86,4 +86,16 @@ object YahooDataSourceRun {
 
 
 
+// Linear regression
+
+Input: Feature Vector: X(0), ..., X(n-1)
+Output: Tomorrow Return
+
+Weight: Weight of feature that contributes to tomorrow return.
+
+
+
+
+
+
 
