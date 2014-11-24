@@ -1,14 +1,28 @@
 abstract class BaseIndicator {
   // used in createModel
-  def getTraining(input: Series[DateTime, Double]): Series[DateTime, Double]
+  def getTraining(input: Series[DateTime, Double]): Series[DateTime, Double] 
+   = Seq( (Nov 22, 10), (Nov 21, 20), ...., (Nov 8, 100) )
   // used in onClose
   def getOne(input: Series[DateTime, Double]): Double
-  // 
+   = 20
+   
+  // used by createModel
   def minFrameSize(): Int
+  
+  // used by onClose
+  def minWindowSize(): Int
 }
 
 class RSIIndicator(val k: Int) extends BaseIndicator {
+  // RSI: Output Value is always between 0 and 100
+  
+  // Input: price data: from Nov1, 2012 until Nov1, 2014 
+  // Output: RSI from Nov1, 2012 until Nov1, 2014
   def getTraining(...) = {...}
+  
+  
+  // Input: price data: from Oct 15, 2014 until Nov 15, 2014.
+  // Output: RSI on Nov 15, 2014
   def getOne(...) = {...}
 }
 
@@ -20,9 +34,41 @@ class RegressionStrategy(val params: RegressionStrategyParams) extends StockStra
     val tickerFeatureusMaps = params.indicators.map { ... }
   }
 
+  // Today: Nov 22
+  // Task: To predict the price change for tmr.
   def onClose(...) = {
-    // call getOne here.
+    // assume prediction for one ticker
+  
+    // call getOne here. : data from Oct 3 -> Nov 22
+    val price = dataView.priceFrame(windowSize = 30)
+    
+    
+    
   }
+  
+  
+  private def predictOne(
+    coef: DenseVector[Double],
+    price: Series[DateTime, Double]): Double = {
+    val shifts = Seq(0, 1, 5, 22)
+    val sp = shifts
+      .map(s => (s, math.log(price.raw(price.length - s - 1))))
+      .toMap
+    
+    // One feature value for each indicator
+    val features: Seq[Double] = indicators.map(indicator => indicator.getOne(price))
+   
+    val vec = DenseVector[Double](
+      features(0),
+      features(1),
+      ...
+      features(n-1),
+      1)
+
+    val p = coef.dot(vec)
+    return p
+  }
+
 }
 
 object YahooDataSourceRun {
@@ -36,6 +82,8 @@ object YahooDataSourceRun {
     
   }
 }
+
+
 
 
 
