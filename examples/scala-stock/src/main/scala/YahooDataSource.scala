@@ -375,7 +375,7 @@ object YahooDataSource {
 
 object PredefinedDSP {
   val BigSP500 = YahooDataSource.Params(
-    appId = 3,
+    appId = 2,
     entityType = "yahoo",
     untilTime = None,
     windowParams = DataSourceParams(
@@ -388,7 +388,7 @@ object PredefinedDSP {
       tickerList = Run.sp500List))
 
   val SmallSP500 = YahooDataSource.Params(
-    appId = 2,
+    appId = 3,
     entityType = "yahoo",
     untilTime = None,
     windowParams = DataSourceParams(
@@ -420,8 +420,8 @@ object YahooDataSourceRun {
     // Make sure you have a lot of memory.
     // --driver-memory 12G
 
-    val dsp = PredefinedDSP.BigSP500
-    //val dsp = PredefinedDSP.SmallSP500
+    // val dsp = PredefinedDSP.BigSP500
+    val dsp = PredefinedDSP.SmallSP500
     //val dsp = PredefinedDSP.Test
 
     val momentumParams = MomentumStrategyParams(20, 3)
@@ -445,7 +445,11 @@ object YahooDataSourceRun {
         "" -> classOf[RegressionStrategy]
       )),
       //algorithmParamsList = Seq(("", momentumParams)),
-      algorithmParamsList = Seq(("", RegressionStrategyParams(Seq[(String, BaseIndicator)](("rsi shift 1", new RSIIndicator(onCloseWindowSize=30, period=3)), ("rsi shift 5", new RSIIndicator(onCloseWindowSize=30, period=1)), ("rsi shift 22", new RSIIndicator(onCloseWindowSize=30, period=12))), 200))),
+      algorithmParamsList = Seq(("", RegressionStrategyParams(Seq[(String, BaseIndicator)](
+        ("RSI1", new RSIIndicator(onCloseWindowSize=30, period=1)), 
+        ("RSI5", new RSIIndicator(onCloseWindowSize=30, period=5)), 
+        ("RSI22", new RSIIndicator(onCloseWindowSize=30, period=22))), 
+      200))),
       servingClassOpt = Some(FirstServing(classOf[EmptyStrategy])),
       metricsClassOpt = Some(classOf[BacktestingMetrics]),
       metricsParams = metricsParams,

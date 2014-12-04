@@ -16,21 +16,22 @@ import scala.math
 import nak.regress.LinearRegression
 
 case class RegressionStrategyParams (
-  indicators: Seq[(String, BaseIndicator)],  // (indicKey, indicator)
+  indicators: Seq[(String, BaseIndicator)],
   maxTrainingWindowSize: Int
 ) extends Params
 
 class RegressionStrategy (params: RegressionStrategyParams) extends StockStrategy[Map[String, DenseVector[Double]]] {
-  val shifts = Seq(0, 1, 5, 22) // days used in regression model*/
+  val shifts = Seq(0, 1, 5, 22) // days used in regression model
 
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
-  /* Regress on a particular ticker */
+  /* Regress on specific ticker */
   private def regress(
     calculatedData: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
     val array = (
+      // comment this line
       calculatedData.map(_.toVec.contents).reduce(_++_) ++
       Array.fill(retF1d.length)(1.0)).toArray[Double]
     val target = DenseVector[Double](retF1d.toVec.contents)
@@ -39,8 +40,8 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     result
   }
 
-  /* Apply indicators to a particular ticker series */
-  private def getIndicSeq(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
+  /* Train each indicator */
+  private def trainAllIndicators(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
     var retSeq = Seq[Series[DateTime, Double]]()
     var x = 0
     for (x <- 0 to params.indicators.length - 1) {
@@ -49,80 +50,75 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     retSeq
   }
 
-  /* Helper for train */
+  // Get max period from series of indicators - firstIdx = getMaxPeriod + 3
+  // private def getMaxPeriod()
+
+  /* Apply regression algorithm on complete dataset to create a model */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
-    // trainingWindowSize - data time range
-    val price = dataView.priceFrame(params.maxTrainingWindowSize) // map from ticker to array of stock prices
+    // price: row is time, col is ticker, values are prices
+    val price = dataView.priceFrame(params.maxTrainingWindowSize)
     val logPrice = price.mapValues(math.log)
-    val active = dataView.activeFrame(params.maxTrainingWindowSize)
+    val active = dataView.activeFrame(params.maxTrainingWindowSize) // tickers active within trainingWindow
 
-
-    //Calculate target data returns
+    // value used to query prediction results
     val retF1d = getRet(logPrice, -1)
 
-    val timeIndex = price.rowIx // Get row indices
-    val firstIdx = shifts.max + 3
+    val timeIndex = price.rowIx
+    val firstIdx = shifts.max + 3   // only data past offset of 22 matters
     val lastIdx = timeIndex.length
 
-    // Get array of all ticker strings
+    // Get array of ticker strings
     val tickers = price.colIx.toVec.contents
 
-    // For each active ticker, pass in an indicated series into regress
+    // For each active ticker, pass in trained series into regress
     val tickerModelMap = tickers
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
       val model = regress(
-        // Only pass in relevant data
-        getIndicSeq(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
+        // Only pass in valid data
+        trainAllIndicators(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
         retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
 
-    // What is this mapping the tickers to?
+    // tickers mapped to model
     tickerModelMap
   }
 
   private def predictOne(
     coef: DenseVector[Double],
-    price: Series[DateTime, Double]): Double = {
-    //val sp = shifts
-    //  .map(s => (s, math.log(price.raw(price.length - s - 1))))
-    //  .toMap
+    ticker: String,
+    dataView: DataView): Double = {
 
     var densVecArray = Array[Double]();
     var x = 0
     for (x <- 0 to params.indicators.length - 1) {
-      densVecArray = densVecArray ++ Array[Double](params.indicators(x)._2.getOne(price))
+      // get most recent frame
+      val price = dataView.priceFrame(params.indicators(x)._2.minWindowSize())
+      val logPrice = price.mapValues(math.log)
+      // comment this line
+      densVecArray = densVecArray ++ Array[Double](params.indicators(x)._2.getOne(logPrice.firstCol(ticker)))
     }
 
     densVecArray = densVecArray ++ Array[Double](1)
     val vec = DenseVector[Double](densVecArray)
-
-    //val vec = DenseVector[Double](
-    //  sp(shifts(0)) - sp(shifts(1)),
-    //  sp(shifts(0)) - sp(shifts(2)),
-    //  sp(shifts(0)) - sp(shifts(3)),
-    //  1)
-
+  
     val p = coef.dot(vec)
     return p
   }
 
-  /* Helper for predict */
+  /* Returns a mapping of tickers to predictions */
   def onClose(model: Map[String, DenseVector[Double]], query: Query)
   : Prediction = {
     val dataView = query.dataView
-
-    //val price = dataView.priceFrame(windowSize = 30)
-    val price = dataView.priceFrame()
-    val logPrice = price.mapValues(math.log)
 
     val prediction = query.tickers
       .filter(ticker => model.contains(ticker))
       .map { ticker => {
         val p = predictOne(
           model(ticker),
-          logPrice.firstCol(ticker))
+          ticker,
+          dataView)
         (ticker, p)
       }}
 
