@@ -21,7 +21,7 @@ case class RegressionStrategyParams (
 ) extends Params
 
 class RegressionStrategy (params: RegressionStrategyParams) extends StockStrategy[Map[String, DenseVector[Double]]] {
-  val shifts = Seq(0, 1, 5, 22) // days used in regression model
+  // val shifts = Seq(0, 1, 5, 22) // days used in regression model
 
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
@@ -51,7 +51,13 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   }
 
   // Get max period from series of indicators - firstIdx = getMaxPeriod + 3
-  // private def getMaxPeriod()
+  private def getMaxPeriod() : Int = {
+    // make a shifts array
+    val shifts = params.indicators.map {case(name, indicator) => indicator.minWindowSize()}
+
+    // return max of shifts array
+    shifts.max
+  }
 
   /* Apply regression algorithm on complete dataset to create a model */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
@@ -64,7 +70,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     val retF1d = getRet(logPrice, -1)
 
     val timeIndex = price.rowIx
-    val firstIdx = shifts.max + 3   // only data past offset of 22 matters
+    val firstIdx = getMaxPeriod() + 3   // only data past offset of 22 matters
     val lastIdx = timeIndex.length
 
     // Get array of ticker strings
@@ -89,8 +95,9 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     coef: DenseVector[Double],
     ticker: String,
     dataView: DataView): Double = {
-
-    System.out.print("PredictOne: coefficient: ")
+  
+    System.out.print("PredictOne: ticker is " + ticker)
+    System.out.print("PredictOne: coefficient ")
     var y = 0
     for (y <- 0 to coef.length - 1) {
       System.out.print( coef(y) )
