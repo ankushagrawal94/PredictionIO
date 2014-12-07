@@ -41,19 +41,13 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
 
   // Compute each indicator value for training the model
   private def computeIndicator(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
-    var retSeq = Seq[Series[DateTime, Double]]()
-    var x = 0
-    for (x <- 0 to params.indicators.length - 1) {
-      retSeq = retSeq ++ Seq(params.indicators(x)._2.getTraining(logPrice))
-    }
-    retSeq
+    params.indicators.map { case(name, indicator) => indicator.getTraining(logPrice) }
   }
 
   // Get max period from series of indicators
   private def getMaxPeriod() : Int = {
     // make a shifts array
-    val shifts = params.indicators.map {case(name, indicator) => indicator.minWindowSize()}
-
+    val shifts = params.indicators.map { case(name, indicator) => indicator.minWindowSize() }
     shifts.max
   }
 
