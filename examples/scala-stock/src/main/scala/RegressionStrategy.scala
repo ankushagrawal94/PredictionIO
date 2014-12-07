@@ -42,6 +42,13 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   // Compute each indicator value for training the model
   private def computeIndicator(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
     params.indicators.map { case(name, indicator) => indicator.getTraining(logPrice) }
+
+    // var retSeq = Seq[Series[DateTime, Double]]()
+    // var x = 0
+    // for (x <- 0 to params.indicators.length - 1) {
+    //   retSeq = retSeq ++ Seq(params.indicators(x)._2.getTraining(logPrice))
+    // }
+    // retSeq
   }
 
   // Get max period from series of indicators
@@ -76,7 +83,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
         computeIndicator(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
         retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
-    }).toMap
+    // }).toMap
 
     // tickers mapped to model
     tickerModelMap
