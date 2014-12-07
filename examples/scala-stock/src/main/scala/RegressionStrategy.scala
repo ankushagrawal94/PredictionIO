@@ -102,15 +102,11 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     }
     System.out.println()
 
-    var densVecArray = Array[Double]();
-    var x = 0
-    for (x <- 0 to params.indicators.length - 1) {
-      // get most recent frame
-      val price = dataView.priceFrame(params.indicators(x)._2.minWindowSize())
+    val densVecArray = params.indicators.map { case (name, indicator) => {
+      val price = dataView.priceFrame(indicator.minWindowSize())
       val logPrice = price.mapValues(math.log)
-      // Create a densevector filled with a single calculation of each indicator returned by getOne()
-      densVecArray = densVecArray ++ Array[Double](params.indicators(x)._2.getOne(logPrice.firstCol(ticker)))
-    }
+      indicator.getOne(logPrice.firstCol(ticker))
+    }}
 
     densVecArray = densVecArray ++ Array[Double](1)
     val vec = DenseVector[Double](densVecArray)
