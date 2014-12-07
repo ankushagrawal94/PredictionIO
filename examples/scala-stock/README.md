@@ -184,13 +184,13 @@ Click on HTML for the run you want to see the results of.
 On this page, the sharpe ratio is indicative of how effective the Indicator your implemented is in predictions.
 
 ### Tips and Tricks
-To reduce run time run your code on a smaller dataset:
+To reduce run time run your code on a smaller dataset:  
 1. Open `YahooDataSource.scala`  
 2. Look for line `val dsp = PredefinedDSP.BigSP500` and comment it out.  
 3. Uncomment out the line: `val dsp = PredefinedDSP.SmallSP500`  
 4. In the `PredefinedDSP` object, switch the `appId` for `BigSP500`with the `appId` for `SmallSP500`. *Note: It should match the appID in your runnable  
 
-To view standard output:
+To view standard output:  
 1. Open localhost:8080 (spark)  
 2. Click on the most recent worker  
 3. Click on stdout or stderr to view the data in 100kb increments  
