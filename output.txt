@@ -1,0 +1,2 @@
+Spark assembly has been built with Hive, including Datanucleus jars on classpath
+2014-10-26 15:41:13.629 java[17921:618853] Unable to load realm info from SCDynamicStore
