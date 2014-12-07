@@ -83,7 +83,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
         computeIndicator(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
         retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
-    // }).toMap
+    }).toMap
 
     // tickers mapped to model
     tickerModelMap
