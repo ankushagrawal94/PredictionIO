@@ -26,12 +26,11 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
-  /* Regress on specific ticker */
+  // Regress on specific ticker
   private def regress(
     calculatedData: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
     val array = (
-      // comment this line
       calculatedData.map(_.toVec.contents).reduce(_++_) ++
       Array.fill(retF1d.length)(1.0)).toArray[Double]
     val target = DenseVector[Double](retF1d.toVec.contents)
@@ -40,8 +39,8 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     result
   }
 
-  /* Train each indicator */
-  private def trainAllIndicators(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
+  // Compute each indicator value for training the model
+  private def computeIndicator(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
     var retSeq = Seq[Series[DateTime, Double]]()
     var x = 0
     for (x <- 0 to params.indicators.length - 1) {
@@ -50,16 +49,15 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     retSeq
   }
 
-  // Get max period from series of indicators - firstIdx = getMaxPeriod + 3
+  // Get max period from series of indicators
   private def getMaxPeriod() : Int = {
     // make a shifts array
     val shifts = params.indicators.map {case(name, indicator) => indicator.minWindowSize()}
 
-    // return max of shifts array
     shifts.max
   }
 
-  /* Apply regression algorithm on complete dataset to create a model */
+  // Apply regression algorithm on complete dataset to create a model
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // price: row is time, col is ticker, values are prices
     val price = dataView.priceFrame(params.maxTrainingWindowSize)
@@ -70,7 +68,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     val retF1d = getRet(logPrice, -1)
 
     val timeIndex = price.rowIx
-    val firstIdx = getMaxPeriod() + 3   // only data past offset of 22 matters
+    val firstIdx = getMaxPeriod() + 3
     val lastIdx = timeIndex.length
 
     // Get array of ticker strings
@@ -81,8 +79,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     .filter(ticker => (active.firstCol(ticker).findOne(_ == false) == -1))
     .map(ticker => {
       val model = regress(
-        // Only pass in valid data
-        trainAllIndicators(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
+        computeIndicator(price.firstCol(ticker)).map(_.slice(firstIdx, lastIdx)),
         retF1d.firstCol(ticker).slice(firstIdx, lastIdx))
       (ticker, model)
     }).toMap
@@ -110,7 +107,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
       // get most recent frame
       val price = dataView.priceFrame(params.indicators(x)._2.minWindowSize())
       val logPrice = price.mapValues(math.log)
-      // comment this line
+      // Create a densevector filled with a single calculation of each indicator returned by getOne()
       densVecArray = densVecArray ++ Array[Double](params.indicators(x)._2.getOne(logPrice.firstCol(ticker)))
     }
 
@@ -122,7 +119,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     return p
   }
 
-  /* Returns a mapping of tickers to predictions */
+  // Returns a mapping of tickers to predictions
   def onClose(model: Map[String, DenseVector[Double]], query: Query)
   : Prediction = {
     val dataView = query.dataView
