@@ -94,24 +94,25 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     ticker: String,
     dataView: DataView): Double = {
   
-    System.out.print("PredictOne: ticker is " + ticker)
-    System.out.print("PredictOne: coefficient ")
+    // System.out.print("PredictOne: ticker is " + ticker)
+    // System.out.print("PredictOne: coefficient ")
     var y = 0
     for (y <- 0 to coef.length - 1) {
       System.out.print( coef(y) )
     }
     System.out.println()
 
-    val densVecArray = params.indicators.map { case (name, indicator) => {
+    val vecArray = params.indicators.map { case (name, indicator) => {
       val price = dataView.priceFrame(indicator.minWindowSize())
       val logPrice = price.mapValues(math.log)
       indicator.getOne(logPrice.firstCol(ticker))
-    }}
+    }}.toArray
 
-    densVecArray = densVecArray ++ Array[Double](1)
+    val densVecArray = vecArray ++ Array[Double](1)
     val vec = DenseVector[Double](densVecArray)
   
     val p = coef.dot(vec)
+    
     // System.out.println("PredictOne: Dot product ressult: " )
     return p
   }
