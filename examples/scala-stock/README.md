@@ -368,17 +368,17 @@ abstract class BaseIndicator extends Serializable {
 	def minWindowSize(): Int
 }
 ```
-#####`getTraining`
+####`getTraining`
 ######Parameters:
 This function takes in a Series of `logPrices` created from the closing prices of the YahooFinanace Data imported in YahooFinance.scala. `logPrices` refers to the logarithm of each price in the series.
 ######Functionality:
 Performs a transformation over every value in the series to return a training series that will be used in the regression.
-#####`getOne()`
+####`getOne()`
 ######Parameters:
 This function takes in a smaller window of the price series representing the closing price of a single stock over `minWindowSize()`. The size of this series is defined by the return value of `minWindowSize()`
 ######Functionality:
 This function performs the same function as `getTraining()` over a smaller window defined by the return value of `minWindowSize()`. 
-#####`minWindowSize()`
+####`minWindowSize()`
 ######Functionality:
 Returns the minimum window sized required to do a single calculation of the Indicator function implemented by `getTraining()`.
 For example, an indicator that requires seeing the previous 14 days to make a calculation would have a `minWindowSize` of 15 days.
@@ -386,7 +386,7 @@ For example, an indicator that requires seeing the previous 14 days to make a ca
 ##Running New Indicators
 In order to run a newly implemented indicator, open YahooDataSource.scala. This file imports the YahooFinanceData, cleans it for use and then implements and runs the Predictive Engine.
 
-Navigate to Workflow.run() in the `YahooDataSourceRun' object:
+Navigate to Workflow.run() in the `YahooDataSourceRun` object:
 ```
    Workflow.run(
       dataSourceClassOpt = Some(classOf[YahooDataSource]),
