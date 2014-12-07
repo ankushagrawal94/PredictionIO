@@ -21,7 +21,6 @@ case class RegressionStrategyParams (
 ) extends Params
 
 class RegressionStrategy (params: RegressionStrategyParams) extends StockStrategy[Map[String, DenseVector[Double]]] {
-  // val shifts = Seq(0, 1, 5, 22) // days used in regression model
 
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
@@ -42,13 +41,6 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   // Compute each indicator value for training the model
   private def computeIndicator(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
     params.indicators.map { case(name, indicator) => indicator.getTraining(logPrice) }
-
-    // var retSeq = Seq[Series[DateTime, Double]]()
-    // var x = 0
-    // for (x <- 0 to params.indicators.length - 1) {
-    //   retSeq = retSeq ++ Seq(params.indicators(x)._2.getTraining(logPrice))
-    // }
-    // retSeq
   }
 
   // Get max period from series of indicators
