@@ -19,13 +19,13 @@ import nak.regress.LinearRegression
  * Base class for indicators. All indicators should be defined as classes that extend
  * this base class. See RSIIndicator as an example. These indicators can then be
  * instantiated and passed into a StockStrategy class. Refer to tutorial for further
- * explanation /TODO: Link
+ * explanation (found in the README.md file).
  */
 @SerialVersionUID(100L)
 abstract class BaseIndicator extends Serializable {
   def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double]
   def getOne(input: Series[DateTime, Double]): Double
-  def minWindowSize(): Int
+  def getMinWindowSize(): Int
 }
 
 /* Calculates RSI day averages
@@ -37,7 +37,7 @@ class RSIIndicator(period: Int) extends BaseIndicator {
 	private def getRet(logPrice: Series[DateTime, Double]) =
 		(logPrice - logPrice.shift(period)).fillNA(_ => 0.0)
 
-	def minWindowSize(): Int = 30
+	def getMinWindowSize(): Int = 30
 
 	private def calcRS(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
 		//Positive and Negative Vecs
@@ -72,7 +72,7 @@ class ShiftsIndicator(period: Int) extends BaseIndicator {
   private def getRet(logPrice: Series[DateTime, Double], frameShift:Int = period) =
 		(logPrice - logPrice.shift(frameShift)).fillNA(_ => 0.0)
 
-	def minWindowSize(): Int = period + 1
+	def getMinWindowSize(): Int = period + 1
 
 	def getTraining(logPrice: Series[DateTime, Double]): Series[DateTime, Double] = {
 		getRet(logPrice)

@@ -46,7 +46,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   // Get max period from series of indicators
   private def getMaxPeriod() : Int = {
     // make a shifts array
-    val shifts = params.indicators.map { case(name, indicator) => indicator.minWindowSize() }
+    val shifts = params.indicators.map { case(name, indicator) => indicator.getMinWindowSize() }
     shifts.max
   }
 
@@ -95,7 +95,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     System.out.println()
 
     val vecArray = params.indicators.map { case (name, indicator) => {
-      val price = dataView.priceFrame(indicator.minWindowSize())
+      val price = dataView.priceFrame(indicator.getMinWindowSize())
       val logPrice = price.mapValues(math.log)
       indicator.getOne(logPrice.firstCol(ticker))
     }}.toArray
