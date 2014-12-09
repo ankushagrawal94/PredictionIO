@@ -2,9 +2,9 @@ package io.prediction.examples.stock
 
 import io.prediction.controller.Workflow
 import io.prediction.controller.WorkflowParams
-import io.prediction.controller.IdentityPreparator
+import io.prediction.controller.PIdentityPreparator
 import io.prediction.controller.EmptyParams
-import io.prediction.controller.FirstServing
+import io.prediction.controller.LFirstServing
 import io.prediction.controller.Params
 import com.github.nscala_time.time.Imports._
 import scala.collection.immutable.HashMap
@@ -123,7 +123,7 @@ object Run {
 
     val momentumParams = MomentumStrategyParams(20, 3)
 
-    val metricsParams = BacktestingParams(
+    val evaluatorParams = BacktestingParams(
       enterThreshold = 0.01,
       exitThreshold = 0.0,
       maxPositions = 10,
@@ -131,17 +131,17 @@ object Run {
     )
 
     Workflow.run(
-      dataSourceClassOpt = Some(classOf[DataSource]),
+      dataSourceClassOpt = Some(classOf[YahooDataSource]),
       dataSourceParams = dataSourceParams,
-      preparatorClassOpt = Some(IdentityPreparator(classOf[DataSource])),
+      preparatorClassOpt = Some(PIdentityPreparator(classOf[YahooDataSource])),
       algorithmClassMapOpt = Some(Map(
         //"" -> classOf[MomentumStrategy]
         "" -> classOf[RegressionStrategy]
       )),
       algorithmParamsList = Seq(("", momentumParams)),
-      servingClassOpt = Some(FirstServing(classOf[EmptyStrategy])),
-      metricsClassOpt = Some(classOf[BacktestingMetrics]),
-      metricsParams = metricsParams,
+      servingClassOpt = Some(LFirstServing(classOf[EmptyStrategy])),
+      evaluatorClassOpt = Some(classOf[BacktestingEvaluator]),
+      evaluatorParams = evaluatorParams,
       params = WorkflowParams(
         verbose = 0,
         batch = "Imagine: Stock II"))
