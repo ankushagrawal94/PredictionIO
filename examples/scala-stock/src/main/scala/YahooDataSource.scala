@@ -70,9 +70,8 @@ object HistoricalData {
 
 class YahooDataSource(val params: YahooDataSource.Params)
   extends PDataSource[
-      YahooDataSource.Params,
-      DataParams,
       RDD[TrainingData],
+      DataParams,
       QueryDate,
       AnyRef] {
   @transient lazy val batchView = new LBatchView(
@@ -290,7 +289,7 @@ class YahooDataSource(val params: YahooDataSource.Params)
   }
 
   def read(sc: SparkContext)
-  : Seq[(DataParams, RDD[TrainingData], RDD[(QueryDate, AnyRef)])] = {
+  : Seq[(RDD[TrainingData], DataParams, RDD[(QueryDate, AnyRef)])] = {
     val historicalSet = getHistoricalDataSet()
     //data.foreach { println }
     val rawData = getRawData(historicalSet)
@@ -321,8 +320,14 @@ class YahooDataSource(val params: YahooDataSource.Params)
       }}
 
     dataSet.map { case (trainingData, queries) =>
+      /*
       (dataParams,
         sc.parallelize(Array(trainingData)),
+        sc.parallelize(queries))
+      */
+      (
+        sc.parallelize(Array(trainingData)),
+        dataParams,
         sc.parallelize(queries))
     }
   }
@@ -401,7 +406,7 @@ object PredefinedDSP {
       tickerList = Run.sp500List.take(25)))
 
   val Test = YahooDataSource.Params(
-    appId = 1,
+    appId = 4,
     entityType = "yahoo",
     untilTime = Some(new DateTime(2014, 5, 1, 0, 0)),
     windowParams = DataSourceParams(
@@ -439,18 +444,17 @@ object YahooDataSourceRun {
     Workflow.run(
       dataSourceClassOpt = Some(classOf[YahooDataSource]),
       dataSourceParams = dsp,
-      preparatorClassOpt = Some(IdentityPreparator(classOf[DataSource])),
+      preparatorClassOpt = Some(IdentityPreparator(classOf[YahooDataSource])),
       algorithmClassMapOpt = Some(Map(
         //"" -> classOf[MomentumStrategy]
         "" -> classOf[RegressionStrategy]
       )),
       //algorithmParamsList = Seq(("", momentumParams)),
-      algorithmParamsList = Seq(("", RegressionStrategyParams(
-        Seq[(String, BaseIndicator)](
-          ("RSI1", new RSIIndicator(period=1)), 
-          ("RSI5", new RSIIndicator(period=5)), 
-          ("RSI22", new RSIIndicator(period=22))), 
-        200))),
+      algorithmParamsList = Seq(("", RegressionStrategyParams(Seq[(String, BaseIndicator)](
+        ("RSI1", new RSIIndicator(period=1)), 
+        ("RSI5", new RSIIndicator(period=5)), 
+        ("RSI22", new RSIIndicator(period=22))), 
+      200))),
       servingClassOpt = Some(FirstServing(classOf[EmptyStrategy])),
       metricsClassOpt = Some(classOf[BacktestingMetrics]),
       metricsParams = metricsParams,
