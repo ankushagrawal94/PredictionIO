@@ -69,7 +69,7 @@ class RSIIndicator(period: Int) extends BaseIndicator {
 // Indicator that calcuate differences of opening/closing prices
 class ShiftsIndicator(period: Int) extends BaseIndicator {
 
-  private def getRet(logPrice: Series[DateTime, Double], frameShift:Int = period) =
+  	private def getRet(logPrice: Series[DateTime, Double], frameShift:Int = period) =
 		(logPrice - logPrice.shift(frameShift)).fillNA(_ => 0.0)
 
 	def getMinWindowSize(): Int = period + 1
