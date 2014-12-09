@@ -25,7 +25,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
   private def getRet(logPrice: Frame[DateTime, String, Double], d: Int) =
     (logPrice - logPrice.shift(d)).mapVec[Double](_.fillNA(_ => 0.0))
 
-  // Regress on specific ticker
+  /** Perform linear regression on specific ticker */
   private def regress(
     calculatedData: Seq[Series[DateTime, Double]],
     retF1d: Series[DateTime, Double]) = {
@@ -38,19 +38,19 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     result
   }
 
-  // Compute each indicator value for training the model
+  /** Compute each indicator value for training the model */
   private def computeIndicator(logPrice: Series[DateTime, Double]): Seq[Series[DateTime, Double]] = {
     params.indicators.map { case(name, indicator) => indicator.getTraining(logPrice) }
   }
 
-  // Get max period from series of indicators
+  /** Get max period from series of indicators */
   private def getMaxPeriod() : Int = {
     // make a shifts array
     val shifts = params.indicators.map { case(name, indicator) => indicator.getMinWindowSize() }
     shifts.max
   }
 
-  // Apply regression algorithm on complete dataset to create a model
+  /** Applies regression algorithm on complete dataset to create a model. */
   def createModel(dataView: DataView): Map[String, DenseVector[Double]] = {
     // price: row is time, col is ticker, values are prices
     val price = dataView.priceFrame(params.maxTrainingWindowSize)
@@ -85,7 +85,7 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
     coef: DenseVector[Double],
     ticker: String,
     dataView: DataView): Double = {
-  
+
     // System.out.print("PredictOne: ticker is " + ticker)
     // System.out.print("PredictOne: coefficient ")
     var y = 0
@@ -102,14 +102,14 @@ class RegressionStrategy (params: RegressionStrategyParams) extends StockStrateg
 
     val densVecArray = vecArray ++ Array[Double](1)
     val vec = DenseVector[Double](densVecArray)
-  
+
     val p = coef.dot(vec)
-    
+
     // System.out.println("PredictOne: Dot product ressult: " )
     return p
   }
 
-  // Returns a mapping of tickers to predictions
+  /** Returns a mapping of tickers to predictions */
   def onClose(model: Map[String, DenseVector[Double]], query: Query)
   : Prediction = {
     val dataView = query.dataView
